@@ -10,12 +10,22 @@ namespace dcpupp
 	}
 	
 	Token::Token(
-		TokenId id,
+		TokenId type,
 		SourceIterator begin,
 		SourceIterator end)
-		: id(id)
+		: type(type)
 		, begin(begin)
 		, end(end)
+	{
+	}
+	
+
+	Exception::Exception(
+		const char *message,
+		SourceIterator position
+		)
+		: std::runtime_error(message)
+		, position(position)
 	{
 	}
 	
@@ -23,8 +33,7 @@ namespace dcpupp
 	LexicalException::LexicalException(
 		SourceIterator position,
 		LexicalErrorCode error)
-		: std::runtime_error("Lexical exception")
-		, position(position)
+		: Exception("Lexical exception", position)
 		, error(error)
 	{
 	}

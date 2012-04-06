@@ -59,12 +59,12 @@ namespace dcpupp
 	
 	struct Token
 	{
-		TokenId id;
+		TokenId type;
 		SourceIterator begin, end;
 		
 		Token();
 		Token(
-			TokenId id,
+			TokenId type,
 			SourceIterator begin,
 			SourceIterator end);
 	};
@@ -76,14 +76,24 @@ namespace dcpupp
 		LexErr_UnexpectedCharacter,
 	};
 	
-	struct LexicalException : std::runtime_error
+	struct Exception : std::runtime_error
 	{
 		SourceIterator position;
+		
+		explicit Exception(
+			const char *message,
+			SourceIterator position
+			);
+	};
+	
+	struct LexicalException : Exception
+	{
 		LexicalErrorCode error;
 		
 		explicit LexicalException(
 			SourceIterator position,
-			LexicalErrorCode error);
+			LexicalErrorCode error
+			);
 	};
 	
 	struct Scanner

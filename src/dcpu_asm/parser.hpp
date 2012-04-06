@@ -4,76 +4,182 @@
 
 #include "scanner.hpp"
 #include <cstdint>
+#include <memory>
 
 
 namespace dcpupp
 {
+	enum SyntaxErrorCode
+	{
+		SynErr_LabelNameExpected,
+		SynErr_MissingBracket,
+		SynErr_KeywordExpected,
+	};
+	
+	struct SyntaxException : Exception
+	{
+		SyntaxErrorCode error;
+		
+		explicit SyntaxException(
+			SourceIterator position,
+			SyntaxErrorCode error
+			);
+	};
+	
+	enum
+	{
+		UniversalRegisterCount = 8,
+	};
+	
 	enum ArgumentType
 	{
 		Arg_Register,
-		Arg_PtrRegister,
-		Arg_PtrRegisterNext,
-		Arg_Pop,
-		Arg_Peek,
-		Arg_Push,
-		Arg_SP,
-		Arg_PC,
-		Arg_O,
-		Arg_Literal,
+		Arg_PtrRegister = 0x08,
+		Arg_PtrRegisterWord = 0x10,
+		Arg_Pop = 0x18,
+		Arg_Peek = 0x19,
+		Arg_Push = 0x1a,
+		Arg_SP = 0x1b,
+		Arg_PC = 0x1c,
+		Arg_O = 0x1d,
+		Arg_PtrWord = 0x1e,
+		Arg_Word = 0x1f,
+		Arg_SmallLiteral = 0x20,
 	};
 	
 	struct Argument
 	{
-		ArgumentType type;
-		std::uint16_t literal;
-		std::uint16_t register_;
+		virtual ~Argument();
+		virtual void print(std::ostream &os) const = 0;
 	};
 	
-	struct ILineHandler
+	struct Register : Argument
 	{
-		virtual ~ILineHandler();
-		virtual void handleLabel(const std::string &name) = 0;
-		virtual void handleBinaryOperation(
-			TokenId operation,
-			const Argument &a,
-			const Argument &b) = 0;
-		virtual void handleUnaryOperation(
-			TokenId operation,
-			const Argument &argument) = 0;
+		unsigned id;
+		
+		explicit Register(unsigned id);
+		virtual void print(std::ostream &os) const;
 	};
 	
-	enum SyntaxErrorCode
+	struct RegisterPtr : Argument
 	{
-		SynErr_MissingBracket,
+		unsigned id;
+		
+		explicit RegisterPtr(unsigned id);
+		virtual void print(std::ostream &os) const;
 	};
 	
-	struct IErrorHandler
+	struct RegisterWordPtr : Argument
 	{
-		virtual ~IErrorHandler();
-		virtual void handleLexicalError(
-			LexicalErrorCode error,
-			SourceIterator position
-			) = 0;
-		virtual void handleSyntaxError(
-			SyntaxErrorCode error,
-			SourceIterator position
-			) = 0;
+		unsigned id;
+		std::uint16_t next;
+		
+		explicit RegisterWordPtr(unsigned id, std::uint16_t next);
+		virtual void print(std::ostream &os) const;
+	};
+	
+	struct Pop : Argument
+	{
+		virtual void print(std::ostream &os) const;
+	};
+	
+	struct Peek : Argument
+	{
+		virtual void print(std::ostream &os) const;
+	};
+	
+	struct Push : Argument
+	{
+		virtual void print(std::ostream &os) const;
+	};
+	
+	struct SP : Argument
+	{
+		virtual void print(std::ostream &os) const;
+	};
+	
+	struct PC : Argument
+	{
+		virtual void print(std::ostream &os) const;
+	};
+	
+	struct O : Argument
+	{
+		virtual void print(std::ostream &os) const;
+	};
+	
+	struct WordPtr : Argument
+	{
+		std::uint16_t value;
+		
+		explicit WordPtr(std::uint16_t value);
+		virtual void print(std::ostream &os) const;
+	};
+	
+	struct Word : Argument
+	{
+		std::uint16_t value;
+		
+		explicit Word(std::uint16_t value);
+		virtual void print(std::ostream &os) const;
+	};
+	
+	struct SmallLiteral : Argument
+	{
+		unsigned value;
+		
+		explicit SmallLiteral(unsigned value);
+		virtual void print(std::ostream &os) const;
+	};
+	
+	struct Statement
+	{
+		virtual ~Statement();
+		virtual void print(std::ostream &os) const = 0;
+	};
+	
+	struct UnaryStatement : Statement
+	{
+		std::unique_ptr<Argument> argument;
+		
+		explicit UnaryStatement(std::unique_ptr<Argument> argument);
+		virtual void print(std::ostream &os) const;
+	};
+	
+	struct BinaryStatement : Statement
+	{
+		std::unique_ptr<Argument> a, b;
+		
+		explicit BinaryStatement(
+			std::unique_ptr<Argument> a,
+			std::unique_ptr<Argument> b
+			);
+		virtual void print(std::ostream &os) const;
+	};
+	
+	struct Line
+	{
+		std::string label;
+		std::unique_ptr<Statement> statement;
+		
+		explicit Line(
+			std::string label,
+			std::unique_ptr<Statement> statement);
+		Line(Line &&other);
+		Line &operator = (Line &&other);
+		void swap(Line &other);
 	};
 	
 	struct Parser
 	{
 		explicit Parser(
-			Scanner &scanner,
-			ILineHandler &lineHandler,
-			IErrorHandler &errorHandler
+			Scanner &scanner
 			);
-		void parseLine();
+		Line parseLine();
 		
 	private:
 	
 		Scanner &m_scanner;
-		ILineHandler &m_lineHandler;
-		IErrorHandler &m_errorHandler;
 	};
 }
 
