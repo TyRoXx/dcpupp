@@ -104,6 +104,11 @@ namespace dcpupp
 	{
 	}
 	
+	bool NumericConstant::isBelow(std::uint16_t value) const
+	{
+		return (this->value < value);
+	}
+	
 	std::uint16_t NumericConstant::getValue(const ILabelResolver &resolver) const
 	{
 		return value;
@@ -118,6 +123,11 @@ namespace dcpupp
 	LabelConstant::LabelConstant(std::string name)
 		: name(std::move(name))
 	{
+	}
+	
+	bool LabelConstant::isBelow(std::uint16_t value) const
+	{
+		return false; //unknown at this time
 	}
 	
 	std::uint16_t LabelConstant::getValue(const ILabelResolver &resolver) const
@@ -389,7 +399,7 @@ namespace dcpupp
 	
 	std::uint16_t WordArgument::getExtraWordCount() const
 	{
-		return 1;
+		return extra->isBelow(32) ? 0 : 1;
 	}
 	
 	bool WordArgument::hasExtraWord(
@@ -398,9 +408,19 @@ namespace dcpupp
 		ILabelResolver &resolver
 		) const
 	{
-		typeCode = 0x1f;
-		extra = this->extra->getValue(resolver);
-		return true;
+		const auto value = this->extra->getValue(resolver);
+		if (this->extra->isBelow(32))
+		{
+			assert(value < 32);
+			typeCode = 0x20 + value;
+			return false;
+		}
+		else
+		{
+			typeCode = 0x1f;
+			extra = value;
+			return true;
+		}
 	}
 			
 	

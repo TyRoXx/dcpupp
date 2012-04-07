@@ -80,6 +80,7 @@ namespace dcpupp
 	struct Constant
 	{
 		virtual ~Constant();
+		virtual bool isBelow(std::uint16_t value) const = 0;
 		virtual std::uint16_t getValue(const ILabelResolver &resolver) const = 0;
 		virtual void print(std::ostream &os) const = 0;
 	};
@@ -89,6 +90,7 @@ namespace dcpupp
 		std::uint16_t value;
 		
 		explicit NumericConstant(std::uint16_t value);
+		virtual bool isBelow(std::uint16_t value) const;
 		virtual std::uint16_t getValue(const ILabelResolver &resolver) const;
 		virtual void print(std::ostream &os) const;
 	};
@@ -98,6 +100,7 @@ namespace dcpupp
 		std::string name;
 		
 		explicit LabelConstant(std::string name);
+		virtual bool isBelow(std::uint16_t value) const;
 		virtual std::uint16_t getValue(const ILabelResolver &resolver) const;
 		virtual void print(std::ostream &os) const;
 	};
