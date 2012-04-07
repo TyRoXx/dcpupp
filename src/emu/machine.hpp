@@ -87,22 +87,35 @@ namespace dcpupp
 			++pc;
 			const auto a = (instr >> 4) & 0x3f;
 			const auto op = (instr & 0x0f);
-			Word *a_ref = 0, *b_ref = 0;
+			Word *a_ref, *b_ref;
 			
-			switch (op)
+			if (op != Op_NonBasic)
 			{
-			case Op_NonBasic:
-				{
-					b_ref = &getArgument(instr >> 10);
-					break;
-				}
-				
 				a_ref = &getArgument(a);
 				b_ref = &getArgument(instr >> 10);
 				if (skipNext)
 				{
 					skipNext = false;
 					goto next_instruction;
+				}
+			}
+			
+			switch (op)
+			{
+			case Op_NonBasic:
+				{
+					b_ref = &getArgument(instr >> 10);
+					switch (a)
+					{
+					case 0x01: //JSR
+						memory[--sp] = pc;
+						pc = *b_ref;
+						break;
+						
+					default:
+						break;
+					}
+					break;
 				}
 				
 			case Op_Set:
