@@ -665,7 +665,18 @@ namespace dcpupp
 				labelToken.begin,
 				labelToken.end);
 				
-			first = popToken();
+			first = peekToken();
+			if (first.type == Tk_Colon)
+			{
+				line = Line(
+					std::move(label),
+					std::unique_ptr<Statement>(),
+					lineBegin
+					);
+				return true;
+			}
+			
+			popToken();
 		}
 		
 		else if (first.type == Tk_EndOfFile)
@@ -709,7 +720,7 @@ namespace dcpupp
 			
 		case Tk_EndOfFile:
 			break;
-			
+					
 		default:
 			throw SyntaxException(keyword.begin, SynErr_KeywordExpected);
 		}
