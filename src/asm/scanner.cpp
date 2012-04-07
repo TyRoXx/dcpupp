@@ -1,6 +1,7 @@
 #include "scanner.hpp"
 #include <cassert>
 #include <algorithm>
+#include <cctype>
 
 
 namespace dcpupp
@@ -73,7 +74,8 @@ namespace dcpupp
 			}
 			//fall through
 		default:
-			if (c >= '0' && c < ('0' + base))
+			if ((c >= '0') &&
+				(c < static_cast<int>('0' + base)))
 			{
 				return true;
 			}
