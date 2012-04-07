@@ -1,0 +1,39 @@
+
+//a structure as known from C
+vector2 struct
+    x u16 = 0 //default initialization
+    y u16 = 0
+end
+
+//you can create alternative names for types
+char alias u16
+
+//a function
+set_char(pos vector2, c char)
+    //low-level memory access is possible
+    __memory[0x8000 + (y * 32) + x] = c
+    //no semicolons when not necessary
+end
+
+print_line(line u16, str *const char)
+    x u16 = 0
+    while (*str)
+        set_char(
+            vector2(x = x, y = line),
+            *str)
+        ++str
+    end
+end
+
+//a string literal
+message []const char "Hello world"
+
+//the entry point is always called main
+main()
+    for (i u16 = 0; i < 10; ++i)
+        set_char(
+            vector2(x = i, y = 3), //explicit initialization of members
+            'A' + i) //ASCII literals
+    end
+    print_line(1, message) //array-to-pointer decay
+end //no braces

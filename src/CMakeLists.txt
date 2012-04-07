@@ -8,4 +8,5 @@ endif(UNIX)
 
 add_subdirectory(asm)
 add_subdirectory(emu)
+add_subdirectory(pup)
 
