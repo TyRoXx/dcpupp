@@ -485,6 +485,8 @@ namespace dcpupp
 	
 	std::unique_ptr<Statement> Parser::parseData()
 	{
+		assert(!"TODO");
+		return std::unique_ptr<Statement>();
 	}
 	
 	static bool isUniversalRegister(TokenId token)
@@ -629,7 +631,10 @@ namespace dcpupp
 	void Parser::expectRightBracket()
 	{
 		const auto bracketToken = m_scanner.nextToken();
-		
+		if (bracketToken.type != Tk_RightBracket)
+		{
+			throw SyntaxException(bracketToken.begin, SynErr_MissingRightBracket);
+		}
 	}
 }
 

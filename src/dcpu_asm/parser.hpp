@@ -14,7 +14,7 @@ namespace dcpupp
 	enum SyntaxErrorCode
 	{
 		SynErr_LabelNameExpected,
-		SynErr_MissingBracket,
+		SynErr_MissingRightBracket,
 		SynErr_KeywordExpected,
 		SynErr_CommaExpected,
 		SynErr_ArgumentExpected,

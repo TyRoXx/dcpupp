@@ -51,7 +51,7 @@ namespace dcpupp
 	static bool isAlphabetic(char c)
 	{
 		return
-			(c >= 'a' && c <= 'z') &&
+			(c >= 'a' && c <= 'z') ||
 			(c >= 'A' && c <= 'Z');
 	}
 	
