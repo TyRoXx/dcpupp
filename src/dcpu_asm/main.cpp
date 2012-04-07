@@ -61,7 +61,8 @@ struct ErrorHandler : ICompilerErrorHandler
 		const std::string &name
 		)
 	{
-		cerr << "Redefinition of label " << name << endl;
+		cerr << "Redefinition (" << (getLine(redefined) + 1) << "): '" << name
+			<< "' was defined in line " << (getLine(previous) + 1) << endl;
 	}
 	
 private:

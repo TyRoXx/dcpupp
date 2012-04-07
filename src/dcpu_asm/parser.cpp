@@ -631,6 +631,8 @@ namespace dcpupp
 		std::string label;
 		
 		Token first = popToken();
+		const auto lineBegin = first.begin;
+		
 		if (first.type == Tk_Colon)
 		{
 			const Token labelToken = popToken();
@@ -685,6 +687,9 @@ namespace dcpupp
 			assert(statement);
 			break;
 			
+		case Tk_EndOfFile:
+			break;
+			
 		default:
 			throw SyntaxException(keyword.begin, SynErr_KeywordExpected);
 		}
@@ -692,7 +697,7 @@ namespace dcpupp
 		line = Line(
 			std::move(label),
 			std::move(statement),
-			first.begin
+			lineBegin
 			);
 		return true;
 	}

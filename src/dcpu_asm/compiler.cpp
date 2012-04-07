@@ -23,9 +23,15 @@ namespace dcpupp
 	
 	bool Compiler::compile()
 	{
+		struct Label
+		{
+			std::uint16_t address;
+			std::size_t line;
+		};
+		
 		struct LabelManager : ILabelResolver
 		{
-			std::map<std::string, std::uint16_t> labels;
+			std::map<std::string, Label> labels;
 			
 			virtual bool resolve(const std::string &name, std::uint16_t &value) const
 			{
@@ -35,7 +41,7 @@ namespace dcpupp
 					return false;
 				}
 				
-				value = pos->second;
+				value = pos->second.address;
 				return true;
 			}
 		}
@@ -77,14 +83,18 @@ namespace dcpupp
 				const auto i = labelManager.labels.find(line.label);
 				if (i == labelManager.labels.end())
 				{
+					Label label;
+					label.address = positionInMemory;
+					label.line = lines.size();
+					
 					labelManager.labels.insert(std::make_pair(
 						line.label,
-						positionInMemory));
+						label));
 				}
 				else
 				{
 					success = false;
-					const Line &previousLine = lines[i->second];
+					const Line &previousLine = lines[i->second.line];
 					m_errorHandler.handleRedefinition(
 						previousLine.begin,
 						line.begin,
