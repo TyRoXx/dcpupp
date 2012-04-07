@@ -8,3 +8,8 @@ Email: tyroxxxx@gmail.com
 0x10c game: http://0x10c.com/
 DCPU-16 spec: http://0x10c.com/doc/dcpu-16.txt
 
+Currently available tools:
+
+	- dcpuasm, Assembler
+	- dcpuemu, Emulator
+
