@@ -446,7 +446,7 @@ namespace dcpupp
 		ILabelResolver &resolver) const
 	{
 		const unsigned opcode = 0;
-		unsigned a_code = (operation - Tk_Jsr), b_code;
+		unsigned a_code = (operation - Tk_Jsr + 1), b_code;
 		std::uint16_t b_extra;
 		const bool hasBExtra = argument->hasExtraWord(b_code, b_extra, resolver);
 		
@@ -818,19 +818,45 @@ namespace dcpupp
 					return std::unique_ptr<Argument>(
 						new RegisterPtr(secondToken.type - Tk_A));
 				}
-				else if (secondToken.type == Tk_Identifier)
+				else if (secondToken.type == Tk_Identifier ||
+					isIntegerLiteral(secondToken.type))
 				{
+					std::unique_ptr<Constant> constant;
+					if (secondToken.type == Tk_Identifier)
+					{
+						constant.reset(new LabelConstant(std::string(secondToken.begin, secondToken.end)));
+					}
+					else
+					{
+						constant.reset(new NumericConstant(getIntegerValue(secondToken)));
+					}
+						
+					const Token plusToken = peekToken();
+					if (plusToken.type == Tk_Plus)
+					{
+						popToken();
+						const Token register_ = popToken();
+						if (!isUniversalRegister(register_.type))
+						{
+							throw SyntaxException(register_.begin,
+								SynErr_UniversalRegisterExpected);
+						}
+						expectRightBracket();
+						return std::unique_ptr<Argument>(
+							new RegisterWordPtr(
+								register_.type - Tk_A,
+								std::move(constant)));
+					}
+					else
+					{
+						expectRightBracket();
+						return std::unique_ptr<Argument>(
+							new WordPtr(std::move(constant)));
+					}
+					
 					expectRightBracket();
 					return std::unique_ptr<Argument>(
-						new WordPtr(std::unique_ptr<Constant>(
-							new LabelConstant(std::string(secondToken.begin, secondToken.end)))));
-				}
-				else if (isIntegerLiteral(secondToken.type))
-				{
-					expectRightBracket();
-					return std::unique_ptr<Argument>(
-						new WordPtr(std::unique_ptr<Constant>(
-							new NumericConstant(getIntegerValue(secondToken)))));
+						new WordPtr(std::move(constant)));
 				}
 				
 				throw SyntaxException(firstToken.begin, SynErr_ArgumentExpected);

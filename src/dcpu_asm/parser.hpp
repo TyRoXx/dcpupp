@@ -19,6 +19,7 @@ namespace dcpupp
 		SynErr_CommaExpected,
 		SynErr_ArgumentExpected,
 		SynErr_DataExpected,
+		SynErr_UniversalRegisterExpected,
 	};
 	
 	struct SyntaxException : Exception

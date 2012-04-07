@@ -139,8 +139,8 @@ namespace dcpupp
 		case ':': return eatToken(Tk_Colon);
 		case ',': return eatToken(Tk_Comma);
 		case '+': return eatToken(Tk_Plus);
-		case '[': return eatToken(Tk_LeftBracket);
-		case ']': return eatToken(Tk_RightBracket);
+		case '[': case '(': return eatToken(Tk_LeftBracket);
+		case ']': case ')': return eatToken(Tk_RightBracket);
 		case '"':
 			{
 				++m_pos;

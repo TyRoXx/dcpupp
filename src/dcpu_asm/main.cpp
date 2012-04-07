@@ -48,6 +48,8 @@ struct ErrorHandler : ICompilerErrorHandler
 		case SynErr_KeywordExpected: cerr << "Keyword expected: " << getRestOfLine(e.position); break;
 		case SynErr_CommaExpected: cerr << "Comma expected: " << getRestOfLine(e.position); break;
 		case SynErr_ArgumentExpected: cerr << "Argument expected: " << getRestOfLine(e.position); break;
+		case SynErr_DataExpected: cerr << "Data expected: " << getRestOfLine(e.position); break;
+		case SynErr_UniversalRegisterExpected: cerr << "Universal register expected: " << getRestOfLine(e.position); break;
 		default: cerr << "Unknown error"; break;
 		}
 		cerr << endl;
