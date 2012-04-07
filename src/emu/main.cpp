@@ -36,5 +36,16 @@ int main(int argc, char **argv)
 	}
 	
 	Machine machine(std::move(program));
+	
+	struct DebuggingContext
+	{
+		bool startInstruction()
+		{
+			return true;
+		}
+	};
+	
+	DebuggingContext context;
+	machine.run(context);
 }
 
