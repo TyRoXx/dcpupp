@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <memory>
 #include <ostream>
+#include <vector>
 
 
 namespace dcpupp
@@ -16,6 +17,7 @@ namespace dcpupp
 		SynErr_MissingBracket,
 		SynErr_KeywordExpected,
 		SynErr_CommaExpected,
+		SynErr_ArgumentExpected,
 	};
 	
 	struct SyntaxException : Exception
@@ -49,10 +51,53 @@ namespace dcpupp
 		Arg_SmallLiteral = 0x20,
 	};
 	
+	struct IMemoryWriter
+	{
+		virtual ~IMemoryWriter();
+		virtual void write(std::uint16_t value) = 0;
+	};
+	
+	struct ILabelResolver
+	{
+		virtual ~ILabelResolver();
+		virtual bool resolve(const std::string &name, std::uint16_t &value) const = 0;
+	};
+	
 	struct Argument
 	{
 		virtual ~Argument();
 		virtual void print(std::ostream &os) const = 0;
+		virtual std::uint16_t getExtraWordCount() const = 0;
+		virtual bool hasExtraWord(
+			unsigned &typeCode,
+			std::uint16_t &extra,
+			ILabelResolver &resolver
+			) const = 0;
+	};
+	
+	struct Constant
+	{
+		virtual ~Constant();
+		virtual std::uint16_t getValue(const ILabelResolver &resolver) const = 0;
+		virtual void print(std::ostream &os) const = 0;
+	};
+	
+	struct NumericConstant : Constant
+	{
+		std::uint16_t value;
+		
+		explicit NumericConstant(std::uint16_t value);
+		virtual std::uint16_t getValue(const ILabelResolver &resolver) const;
+		virtual void print(std::ostream &os) const;
+	};
+	
+	struct LabelConstant : Constant
+	{
+		std::string name;
+		
+		explicit LabelConstant(std::string name);
+		virtual std::uint16_t getValue(const ILabelResolver &resolver) const;
+		virtual void print(std::ostream &os) const;
 	};
 	
 	struct Register : Argument
@@ -61,6 +106,12 @@ namespace dcpupp
 		
 		explicit Register(unsigned id);
 		virtual void print(std::ostream &os) const;
+		virtual std::uint16_t getExtraWordCount() const;
+		virtual bool hasExtraWord(
+			unsigned &typeCode,
+			std::uint16_t &extra,
+			ILabelResolver &resolver
+			) const;
 	};
 	
 	struct RegisterPtr : Argument
@@ -69,67 +120,134 @@ namespace dcpupp
 		
 		explicit RegisterPtr(unsigned id);
 		virtual void print(std::ostream &os) const;
+		virtual std::uint16_t getExtraWordCount() const;
+		virtual bool hasExtraWord(
+			unsigned &typeCode,
+			std::uint16_t &extra,
+			ILabelResolver &resolver
+			) const;
 	};
 	
 	struct RegisterWordPtr : Argument
 	{
 		unsigned id;
-		std::uint16_t next;
+		std::unique_ptr<Constant> extra;
 		
-		explicit RegisterWordPtr(unsigned id, std::uint16_t next);
+		explicit RegisterWordPtr(
+			unsigned id,
+			std::unique_ptr<Constant> extra
+			);
 		virtual void print(std::ostream &os) const;
+		virtual std::uint16_t getExtraWordCount() const;
+		virtual bool hasExtraWord(
+			unsigned &typeCode,
+			std::uint16_t &extra,
+			ILabelResolver &resolver
+			) const;
 	};
 	
 	struct Pop : Argument
 	{
 		virtual void print(std::ostream &os) const;
+		virtual std::uint16_t getExtraWordCount() const;
+		virtual bool hasExtraWord(
+			unsigned &typeCode,
+			std::uint16_t &extra,
+			ILabelResolver &resolver
+			) const;
 	};
 	
 	struct Peek : Argument
 	{
 		virtual void print(std::ostream &os) const;
+		virtual std::uint16_t getExtraWordCount() const;
+		virtual bool hasExtraWord(
+			unsigned &typeCode,
+			std::uint16_t &extra,
+			ILabelResolver &resolver
+			) const;
 	};
 	
 	struct Push : Argument
 	{
 		virtual void print(std::ostream &os) const;
+		virtual std::uint16_t getExtraWordCount() const;
+		virtual bool hasExtraWord(
+			unsigned &typeCode,
+			std::uint16_t &extra,
+			ILabelResolver &resolver
+			) const;
 	};
 	
 	struct SP : Argument
 	{
 		virtual void print(std::ostream &os) const;
+		virtual std::uint16_t getExtraWordCount() const;
+		virtual bool hasExtraWord(
+			unsigned &typeCode,
+			std::uint16_t &extra,
+			ILabelResolver &resolver
+			) const;
 	};
 	
 	struct PC : Argument
 	{
 		virtual void print(std::ostream &os) const;
+		virtual std::uint16_t getExtraWordCount() const;
+		virtual bool hasExtraWord(
+			unsigned &typeCode,
+			std::uint16_t &extra,
+			ILabelResolver &resolver
+			) const;
 	};
 	
 	struct O : Argument
 	{
 		virtual void print(std::ostream &os) const;
+		virtual std::uint16_t getExtraWordCount() const;
+		virtual bool hasExtraWord(
+			unsigned &typeCode,
+			std::uint16_t &extra,
+			ILabelResolver &resolver
+			) const;
 	};
 	
 	struct WordPtr : Argument
 	{
-		std::uint16_t value;
+		std::unique_ptr<Constant> extra;
 		
-		explicit WordPtr(std::uint16_t value);
+		explicit WordPtr(std::unique_ptr<Constant> extra);
 		virtual void print(std::ostream &os) const;
+		virtual std::uint16_t getExtraWordCount() const;
+		virtual bool hasExtraWord(
+			unsigned &typeCode,
+			std::uint16_t &extra,
+			ILabelResolver &resolver
+			) const;
 	};
 	
 	struct Word : Argument
 	{
-		std::uint16_t value;
+		std::unique_ptr<Constant> extra;
 		
-		explicit Word(std::uint16_t value);
+		explicit Word(std::unique_ptr<Constant> extra);
 		virtual void print(std::ostream &os) const;
+		virtual std::uint16_t getExtraWordCount() const;
+		virtual bool hasExtraWord(
+			unsigned &typeCode,
+			std::uint16_t &extra,
+			ILabelResolver &resolver
+			) const;
 	};
 	
 	struct Statement
 	{
 		virtual ~Statement();
 		virtual void print(std::ostream &os) const = 0;
+		virtual std::uint16_t getSizeInMemory() const = 0;
+		virtual void compile(
+			IMemoryWriter &destination,
+			ILabelResolver &resolver) const = 0;
 	};
 	
 	struct UnaryStatement : Statement
@@ -142,6 +260,11 @@ namespace dcpupp
 			std::unique_ptr<Argument> argument
 			);
 		virtual void print(std::ostream &os) const;
+		virtual std::uint16_t getSizeInMemory() const;
+		virtual void compile(
+			IMemoryWriter &destination,
+			ILabelResolver &resolver
+			) const;
 	};
 	
 	struct BinaryStatement : Statement
@@ -155,11 +278,24 @@ namespace dcpupp
 			std::unique_ptr<Argument> b
 			);
 		virtual void print(std::ostream &os) const;
+		virtual std::uint16_t getSizeInMemory() const;
+		virtual void compile(
+			IMemoryWriter &destination,
+			ILabelResolver &resolver
+			) const;
 	};
 	
 	struct Data : Statement
 	{
+		std::vector<std::uint16_t> value;
+		
+		explicit Data(std::vector<std::uint16_t> value);
 		virtual void print(std::ostream &os) const;
+		virtual std::uint16_t getSizeInMemory() const;
+		virtual void compile(
+			IMemoryWriter &destination,
+			ILabelResolver &resolver
+			) const;
 	};
 	
 	struct Line
@@ -177,6 +313,7 @@ namespace dcpupp
 		Line(Line &&other);
 		Line &operator = (Line &&other);
 		void swap(Line &other);
+		std::uint16_t getSizeInMemory() const;
 	};
 	
 	struct Parser
@@ -184,6 +321,7 @@ namespace dcpupp
 		explicit Parser(
 			Scanner &scanner
 			);
+		Scanner &getScanner() const;
 		bool parseLine(Line &line);
 		
 	private:
@@ -194,6 +332,7 @@ namespace dcpupp
 		std::unique_ptr<Statement> parseUnaryStatement(TokenId operation);
 		std::unique_ptr<Statement> parseData();
 		std::unique_ptr<Argument> parseArgument();
+		void expectRightBracket();
 	};
 }
 
