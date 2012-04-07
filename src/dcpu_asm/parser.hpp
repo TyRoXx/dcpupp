@@ -5,6 +5,7 @@
 #include "scanner.hpp"
 #include <cstdint>
 #include <memory>
+#include <ostream>
 
 
 namespace dcpupp
@@ -14,6 +15,7 @@ namespace dcpupp
 		SynErr_LabelNameExpected,
 		SynErr_MissingBracket,
 		SynErr_KeywordExpected,
+		SynErr_CommaExpected,
 	};
 	
 	struct SyntaxException : Exception
@@ -140,20 +142,31 @@ namespace dcpupp
 	
 	struct UnaryStatement : Statement
 	{
+		TokenId operation;
 		std::unique_ptr<Argument> argument;
 		
-		explicit UnaryStatement(std::unique_ptr<Argument> argument);
+		explicit UnaryStatement(
+			TokenId operation,
+			std::unique_ptr<Argument> argument
+			);
 		virtual void print(std::ostream &os) const;
 	};
 	
 	struct BinaryStatement : Statement
 	{
+		TokenId operation;
 		std::unique_ptr<Argument> a, b;
 		
 		explicit BinaryStatement(
+			TokenId operation,
 			std::unique_ptr<Argument> a,
 			std::unique_ptr<Argument> b
 			);
+		virtual void print(std::ostream &os) const;
+	};
+	
+	struct Data : Statement
+	{
 		virtual void print(std::ostream &os) const;
 	};
 	
@@ -180,6 +193,11 @@ namespace dcpupp
 	private:
 	
 		Scanner &m_scanner;
+		
+		std::unique_ptr<Statement> parseBinaryStatement(TokenId operation);
+		std::unique_ptr<Statement> parseUnaryStatement(TokenId operation);
+		std::unique_ptr<Statement> parseData();
+		std::unique_ptr<Argument> parseArgument();
 	};
 }
 
