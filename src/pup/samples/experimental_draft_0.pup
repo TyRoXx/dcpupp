@@ -25,6 +25,25 @@ print_line(line u16, str *const char)
     end
 end
 
+get_time() -> u16 //return type syntax
+    //future versions of DCPU-16 may introduce I/O
+    return __time
+end
+
+itoa(i u16, str *char)
+    d u16 = i / 10000 % 10
+    *str = '0' + d; str++;
+    d = i / 1000 % 10
+    *str = '0' + d; str++;
+    d = i / 100 % 10
+    *str = '0' + d; str++;
+    d = i / 10 % 10
+    *str = '0' + d; str++;
+    d = i / 1 % 10
+    *str = '0' + d; str++;
+    *str = 0
+end
+
 //a string literal
 message []const char "Hello world"
 
@@ -36,4 +55,25 @@ main()
             'A' + i) //ASCII literals
     end
     print_line(1, message) //array-to-pointer decay
+    
+    //readable pseudo-objects
+    test u16 = __pc
+    test = __sp
+    test = __o
+    test = __a + __b + __j
+    
+    goto jump_label
+    :jump_label
+    
+    time_str [6]char
+    itoa(get_time(), time_str)
+    print_line(2, time_str)
+    
+    c u16
+    __asm //inline assembly for optimization purposes
+        SET @c, C //the compiler replaces @c with sth like [Z], Z being the stack pointer
+        SET C, 0x123
+        SET C, @c
+        SET PC, @jump_label
+    end
 end //no braces
