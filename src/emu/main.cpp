@@ -50,6 +50,14 @@ int main(int argc, char **argv)
 		{
 #ifdef __unix__
 			write(1, "\E[H\E[2J", 7);
+			
+			for (size_t i = 0; i < 8; ++i)
+			{
+				printf("%c: %04x, ", "ABCXYZIJ"[i], machine.registers[i]);
+			}
+			puts("");
+			printf("SP: %04x, PC: %04x, O: %04x\n", machine.sp, machine.pc, machine.o);
+			
 			const size_t width = 32, height = 12;
 			const size_t videoAddress = 0x8000;
 			for (size_t y = 0; y < height; ++y)
@@ -60,9 +68,14 @@ int main(int argc, char **argv)
 						y * width +
 						x;
 					const char c = (char)machine.memory[charAddress];
-					write(1, &c, 1);
+					fputc(c, stdout);
+					//write(1, &c, 1);
 				}
+				
+				fputc('\n', stdout);
 			}
+			
+			fflush(stdout);
 #endif
 			return true;
 		}
