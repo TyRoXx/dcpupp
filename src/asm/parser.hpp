@@ -102,11 +102,11 @@ namespace dcpupp
 		virtual void print(std::ostream &os) const;
 	};
 	
-	struct Register : Argument
+	struct RegisterArgument : Argument
 	{
 		unsigned id;
 		
-		explicit Register(unsigned id);
+		explicit RegisterArgument(unsigned id);
 		virtual void print(std::ostream &os) const;
 		virtual std::uint16_t getExtraWordCount() const;
 		virtual bool hasExtraWord(
@@ -116,11 +116,11 @@ namespace dcpupp
 			) const;
 	};
 	
-	struct RegisterPtr : Argument
+	struct RegisterPtrArgument : Argument
 	{
 		unsigned id;
 		
-		explicit RegisterPtr(unsigned id);
+		explicit RegisterPtrArgument(unsigned id);
 		virtual void print(std::ostream &os) const;
 		virtual std::uint16_t getExtraWordCount() const;
 		virtual bool hasExtraWord(
@@ -130,12 +130,12 @@ namespace dcpupp
 			) const;
 	};
 	
-	struct RegisterWordPtr : Argument
+	struct RegisterWordPtrArgument : Argument
 	{
 		unsigned id;
 		std::unique_ptr<Constant> extra;
 		
-		explicit RegisterWordPtr(
+		explicit RegisterWordPtrArgument(
 			unsigned id,
 			std::unique_ptr<Constant> extra
 			);
@@ -148,7 +148,7 @@ namespace dcpupp
 			) const;
 	};
 	
-	struct Pop : Argument
+	struct PopArgument : Argument
 	{
 		virtual void print(std::ostream &os) const;
 		virtual std::uint16_t getExtraWordCount() const;
@@ -159,7 +159,7 @@ namespace dcpupp
 			) const;
 	};
 	
-	struct Peek : Argument
+	struct PeekArgument : Argument
 	{
 		virtual void print(std::ostream &os) const;
 		virtual std::uint16_t getExtraWordCount() const;
@@ -170,7 +170,7 @@ namespace dcpupp
 			) const;
 	};
 	
-	struct Push : Argument
+	struct PushArgument : Argument
 	{
 		virtual void print(std::ostream &os) const;
 		virtual std::uint16_t getExtraWordCount() const;
@@ -181,7 +181,7 @@ namespace dcpupp
 			) const;
 	};
 	
-	struct SP : Argument
+	struct SPArgument : Argument
 	{
 		virtual void print(std::ostream &os) const;
 		virtual std::uint16_t getExtraWordCount() const;
@@ -192,7 +192,7 @@ namespace dcpupp
 			) const;
 	};
 	
-	struct PC : Argument
+	struct PCArgument : Argument
 	{
 		virtual void print(std::ostream &os) const;
 		virtual std::uint16_t getExtraWordCount() const;
@@ -203,7 +203,7 @@ namespace dcpupp
 			) const;
 	};
 	
-	struct O : Argument
+	struct OArgument : Argument
 	{
 		virtual void print(std::ostream &os) const;
 		virtual std::uint16_t getExtraWordCount() const;
@@ -214,11 +214,11 @@ namespace dcpupp
 			) const;
 	};
 	
-	struct WordPtr : Argument
+	struct WordPtrArgument : Argument
 	{
 		std::unique_ptr<Constant> extra;
 		
-		explicit WordPtr(std::unique_ptr<Constant> extra);
+		explicit WordPtrArgument(std::unique_ptr<Constant> extra);
 		virtual void print(std::ostream &os) const;
 		virtual std::uint16_t getExtraWordCount() const;
 		virtual bool hasExtraWord(
@@ -228,11 +228,11 @@ namespace dcpupp
 			) const;
 	};
 	
-	struct Word : Argument
+	struct WordArgument : Argument
 	{
 		std::unique_ptr<Constant> extra;
 		
-		explicit Word(std::unique_ptr<Constant> extra);
+		explicit WordArgument(std::unique_ptr<Constant> extra);
 		virtual void print(std::ostream &os) const;
 		virtual std::uint16_t getExtraWordCount() const;
 		virtual bool hasExtraWord(

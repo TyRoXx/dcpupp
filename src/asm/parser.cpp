@@ -136,24 +136,24 @@ namespace dcpupp
 	}
 
 
-	Register::Register(unsigned id)
+	RegisterArgument::RegisterArgument(unsigned id)
 		: id(id)
 	{
 	}
 	
 	static const char * const UniversalRegisterNames = "ABCXYZIJ";
 	
-	void Register::print(std::ostream &os) const
+	void RegisterArgument::print(std::ostream &os) const
 	{
 		os << UniversalRegisterNames[id];
 	}
 	
-	std::uint16_t Register::getExtraWordCount() const
+	std::uint16_t RegisterArgument::getExtraWordCount() const
 	{
 		return 0;
 	}
 	
-	bool Register::hasExtraWord(
+	bool RegisterArgument::hasExtraWord(
 		unsigned &typeCode,
 		std::uint16_t &extra,
 		ILabelResolver &resolver
@@ -164,22 +164,22 @@ namespace dcpupp
 	}
 	
 	
-	RegisterPtr::RegisterPtr(unsigned id)
+	RegisterPtrArgument::RegisterPtrArgument(unsigned id)
 		: id(id)
 	{
 	}
 	
-	void RegisterPtr::print(std::ostream &os) const
+	void RegisterPtrArgument::print(std::ostream &os) const
 	{
 		os << "[" << UniversalRegisterNames[id] << "]";
 	}
 	
-	std::uint16_t RegisterPtr::getExtraWordCount() const
+	std::uint16_t RegisterPtrArgument::getExtraWordCount() const
 	{
 		return 0;
 	}
 	
-	bool RegisterPtr::hasExtraWord(
+	bool RegisterPtrArgument::hasExtraWord(
 		unsigned &typeCode,
 		std::uint16_t &extra,
 		ILabelResolver &resolver
@@ -190,7 +190,7 @@ namespace dcpupp
 	}
 	
 	
-	RegisterWordPtr::RegisterWordPtr(
+	RegisterWordPtrArgument::RegisterWordPtrArgument(
 		unsigned id,
 		std::unique_ptr<Constant> extra
 		)
@@ -199,18 +199,18 @@ namespace dcpupp
 	{
 	}
 	
-	void RegisterWordPtr::print(std::ostream &os) const
+	void RegisterWordPtrArgument::print(std::ostream &os) const
 	{
 		extra->print(os);
 		os << "+" << UniversalRegisterNames[id];
 	}
 	
-	std::uint16_t RegisterWordPtr::getExtraWordCount() const
+	std::uint16_t RegisterWordPtrArgument::getExtraWordCount() const
 	{
 		return 1;
 	}
 	
-	bool RegisterWordPtr::hasExtraWord(
+	bool RegisterWordPtrArgument::hasExtraWord(
 		unsigned &typeCode,
 		std::uint16_t &extra,
 		ILabelResolver &resolver
@@ -222,17 +222,17 @@ namespace dcpupp
 	}
 	
 	
-	void Pop::print(std::ostream &os) const
+	void PopArgument::print(std::ostream &os) const
 	{
 		os << "POP";
 	}
 	
-	std::uint16_t Pop::getExtraWordCount() const
+	std::uint16_t PopArgument::getExtraWordCount() const
 	{
 		return 0;
 	}
 	
-	bool Pop::hasExtraWord(
+	bool PopArgument::hasExtraWord(
 		unsigned &typeCode,
 		std::uint16_t &extra,
 		ILabelResolver &resolver
@@ -243,17 +243,17 @@ namespace dcpupp
 	}
 	
 	
-	void Peek::print(std::ostream &os) const
+	void PeekArgument::print(std::ostream &os) const
 	{
 		os << "PEEK";
 	}
 	
-	std::uint16_t Peek::getExtraWordCount() const
+	std::uint16_t PeekArgument::getExtraWordCount() const
 	{
 		return 0;
 	}
 	
-	bool Peek::hasExtraWord(
+	bool PeekArgument::hasExtraWord(
 		unsigned &typeCode,
 		std::uint16_t &extra,
 		ILabelResolver &resolver
@@ -264,17 +264,17 @@ namespace dcpupp
 	}
 	
 	
-	void Push::print(std::ostream &os) const
+	void PushArgument::print(std::ostream &os) const
 	{
 		os << "PUSH";
 	}
 	
-	std::uint16_t Push::getExtraWordCount() const
+	std::uint16_t PushArgument::getExtraWordCount() const
 	{
 		return 0;
 	}
 	
-	bool Push::hasExtraWord(
+	bool PushArgument::hasExtraWord(
 		unsigned &typeCode,
 		std::uint16_t &extra,
 		ILabelResolver &resolver
@@ -285,17 +285,17 @@ namespace dcpupp
 	}
 			
 			
-	void SP::print(std::ostream &os) const
+	void SPArgument::print(std::ostream &os) const
 	{
 		os << "SP";
 	}
 	
-	std::uint16_t SP::getExtraWordCount() const
+	std::uint16_t SPArgument::getExtraWordCount() const
 	{
 		return 0;
 	}
 	
-	bool SP::hasExtraWord(
+	bool SPArgument::hasExtraWord(
 		unsigned &typeCode,
 		std::uint16_t &extra,
 		ILabelResolver &resolver
@@ -306,17 +306,17 @@ namespace dcpupp
 	}
 			
 			
-	void PC::print(std::ostream &os) const
+	void PCArgument::print(std::ostream &os) const
 	{
 		os << "PC";
 	}
 	
-	std::uint16_t PC::getExtraWordCount() const
+	std::uint16_t PCArgument::getExtraWordCount() const
 	{
 		return 0;
 	}
 	
-	bool PC::hasExtraWord(
+	bool PCArgument::hasExtraWord(
 		unsigned &typeCode,
 		std::uint16_t &extra,
 		ILabelResolver &resolver
@@ -327,17 +327,17 @@ namespace dcpupp
 	}
 			
 			
-	void O::print(std::ostream &os) const
+	void OArgument::print(std::ostream &os) const
 	{
 		os << "O";
 	}
 	
-	std::uint16_t O::getExtraWordCount() const
+	std::uint16_t OArgument::getExtraWordCount() const
 	{
 		return 0;
 	}
 	
-	bool O::hasExtraWord(
+	bool OArgument::hasExtraWord(
 		unsigned &typeCode,
 		std::uint16_t &extra,
 		ILabelResolver &resolver
@@ -348,24 +348,24 @@ namespace dcpupp
 	}
 			
 	
-	WordPtr::WordPtr(std::unique_ptr<Constant> extra)
+	WordPtrArgument::WordPtrArgument(std::unique_ptr<Constant> extra)
 		: extra(std::move(extra))
 	{
 	}
 	
-	void WordPtr::print(std::ostream &os) const
+	void WordPtrArgument::print(std::ostream &os) const
 	{
 		os << "[";
 		extra->print(os);
 		os << "]";
 	}
 	
-	std::uint16_t WordPtr::getExtraWordCount() const
+	std::uint16_t WordPtrArgument::getExtraWordCount() const
 	{
 		return 1;
 	}
 	
-	bool WordPtr::hasExtraWord(
+	bool WordPtrArgument::hasExtraWord(
 		unsigned &typeCode,
 		std::uint16_t &extra,
 		ILabelResolver &resolver
@@ -377,22 +377,22 @@ namespace dcpupp
 	}
 	
 	
-	Word::Word(std::unique_ptr<Constant> extra)
+	WordArgument::WordArgument(std::unique_ptr<Constant> extra)
 		: extra(std::move(extra))
 	{
 	}
 	
-	void Word::print(std::ostream &os) const
+	void WordArgument::print(std::ostream &os) const
 	{
 		extra->print(os);
 	}
 	
-	std::uint16_t Word::getExtraWordCount() const
+	std::uint16_t WordArgument::getExtraWordCount() const
 	{
 		return 1;
 	}
 	
-	bool Word::hasExtraWord(
+	bool WordArgument::hasExtraWord(
 		unsigned &typeCode,
 		std::uint16_t &extra,
 		ILabelResolver &resolver
@@ -821,7 +821,7 @@ namespace dcpupp
 				{
 					expectRightBracket();
 					return std::unique_ptr<Argument>(
-						new RegisterPtr(secondToken.type - Tk_A));
+						new RegisterPtrArgument(secondToken.type - Tk_A));
 				}
 				else if (secondToken.type == Tk_Identifier ||
 					isIntegerLiteral(secondToken.type))
@@ -848,7 +848,7 @@ namespace dcpupp
 						}
 						expectRightBracket();
 						return std::unique_ptr<Argument>(
-							new RegisterWordPtr(
+							new RegisterWordPtrArgument(
 								register_.type - Tk_A,
 								std::move(constant)));
 					}
@@ -856,12 +856,12 @@ namespace dcpupp
 					{
 						expectRightBracket();
 						return std::unique_ptr<Argument>(
-							new WordPtr(std::move(constant)));
+							new WordPtrArgument(std::move(constant)));
 					}
 					
 					expectRightBracket();
 					return std::unique_ptr<Argument>(
-						new WordPtr(std::move(constant)));
+						new WordPtrArgument(std::move(constant)));
 				}
 				
 				throw SyntaxException(firstToken.begin, SynErr_ArgumentExpected);
@@ -870,38 +870,38 @@ namespace dcpupp
 		case Tk_Identifier:
 			{
 				return std::unique_ptr<Argument>(
-					new Word(std::unique_ptr<Constant>(
+					new WordArgument(std::unique_ptr<Constant>(
 						new LabelConstant(std::string(firstToken.begin, firstToken.end)))));
 			}
 			
 		case Tk_Pop:
-			return std::unique_ptr<Argument>(new Pop);
+			return std::unique_ptr<Argument>(new PopArgument);
 			
 		case Tk_Peek:
-			return std::unique_ptr<Argument>(new Peek);
+			return std::unique_ptr<Argument>(new PeekArgument);
 			
 		case Tk_Push:
-			return std::unique_ptr<Argument>(new Push);
+			return std::unique_ptr<Argument>(new PushArgument);
 			
 		case Tk_SP:
-			return std::unique_ptr<Argument>(new SP);
+			return std::unique_ptr<Argument>(new SPArgument);
 			
 		case Tk_PC:
-			return std::unique_ptr<Argument>(new PC);
+			return std::unique_ptr<Argument>(new PCArgument);
 			
 		case Tk_O:
-			return std::unique_ptr<Argument>(new O);
+			return std::unique_ptr<Argument>(new OArgument);
 			
 		default:
 			if (isUniversalRegister(firstToken.type))
 			{
 				return std::unique_ptr<Argument>(
-					new Register(firstToken.type - Tk_A));
+					new RegisterArgument(firstToken.type - Tk_A));
 			}
 			else if (isIntegerLiteral(firstToken.type))
 			{
 				return std::unique_ptr<Argument>(
-					new Word(std::unique_ptr<Constant>(
+					new WordArgument(std::unique_ptr<Constant>(
 						new NumericConstant(getIntegerValue(firstToken)))));
 			}
 				
