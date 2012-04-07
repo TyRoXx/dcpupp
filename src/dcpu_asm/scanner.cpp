@@ -245,6 +245,12 @@ namespace dcpupp
 								literalBegin,
 								literalEnd);
 						}
+						
+						//a single zero digit
+						else
+						{
+							return Token(Tk_Decimal, m_pos - 1, m_pos);
+						}
 					}
 					else
 					{
