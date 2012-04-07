@@ -126,14 +126,6 @@ namespace dcpupp
 		virtual void print(std::ostream &os) const;
 	};
 	
-	struct SmallLiteral : Argument
-	{
-		unsigned value;
-		
-		explicit SmallLiteral(unsigned value);
-		virtual void print(std::ostream &os) const;
-	};
-	
 	struct Statement
 	{
 		virtual ~Statement();
@@ -174,10 +166,14 @@ namespace dcpupp
 	{
 		std::string label;
 		std::unique_ptr<Statement> statement;
+		SourceIterator begin;
 		
+		Line();
 		explicit Line(
 			std::string label,
-			std::unique_ptr<Statement> statement);
+			std::unique_ptr<Statement> statement,
+			SourceIterator begin
+			);
 		Line(Line &&other);
 		Line &operator = (Line &&other);
 		void swap(Line &other);
@@ -188,7 +184,7 @@ namespace dcpupp
 		explicit Parser(
 			Scanner &scanner
 			);
-		Line parseLine();
+		bool parseLine(Line &line);
 		
 	private:
 	

@@ -127,6 +127,11 @@ namespace dcpupp
 	{
 		skipWhitespace();
 		
+		if (m_pos == m_end)
+		{
+			return Token(Tk_EndOfFile, m_end, m_end);
+		}
+		
 		const char firstChar = *m_pos;
 		
 		switch (firstChar)

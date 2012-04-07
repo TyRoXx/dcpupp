@@ -91,12 +91,19 @@ namespace dcpupp
 		b->print(os);
 	}
 	
-		
+	
+	Line::Line()
+	{
+	}
+	
 	Line::Line(
 		std::string label,
-		std::unique_ptr<Statement> statement)
+		std::unique_ptr<Statement> statement,
+		SourceIterator begin
+		)
 		: label(std::move(label))
 		, statement(std::move(statement))
+		, begin(begin)
 	{
 	}
 	
@@ -118,6 +125,7 @@ namespace dcpupp
 	{
 		label.swap(other.label);
 		statement.swap(other.statement);
+		std::swap(begin, other.begin);
 	}
 		
 		
@@ -128,7 +136,7 @@ namespace dcpupp
 	{
 	}
 	
-	Line Parser::parseLine()
+	bool Parser::parseLine(Line &line)
 	{
 		std::string label;
 		
@@ -144,6 +152,11 @@ namespace dcpupp
 			label.assign(
 				labelToken.begin,
 				labelToken.end);
+		}
+		
+		else if (first.type == Tk_EndOfFile)
+		{
+			return false;
 		}
 		
 		std::unique_ptr<Statement> statement;
@@ -185,10 +198,12 @@ namespace dcpupp
 			throw SyntaxException(keyword.begin, SynErr_KeywordExpected);
 		}
 		
-		return Line(
+		line = Line(
 			std::move(label),
-			std::move(statement)
+			std::move(statement),
+			first.begin
 			);
+		return true;
 	}
 	
 	
