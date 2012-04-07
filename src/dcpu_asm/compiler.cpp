@@ -60,6 +60,7 @@ namespace dcpupp
 				success = false;
 				m_errorHandler.handleError(e);
 				m_parser.getScanner().skipLine();
+				m_parser.resetCache();
 				continue;
 			}
 			catch (const SyntaxException &e)
@@ -67,6 +68,7 @@ namespace dcpupp
 				success = false;
 				m_errorHandler.handleError(e);
 				m_parser.getScanner().skipLine();
+				m_parser.resetCache();
 				continue;
 			}
 			

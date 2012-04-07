@@ -5,6 +5,70 @@
 
 namespace dcpupp
 {
+	static bool isIntegerLiteral(TokenId token)
+	{
+		switch (token)
+		{
+		case Tk_Decimal:
+		case Tk_Hexadecimal:
+		case Tk_Octal:
+		case Tk_Binary:
+			return true;
+			
+		default:
+			return false;
+		}
+	}
+	
+	static unsigned getDigitValue(char c)
+	{
+		switch (c)
+		{
+		case '0': return 0;
+		case '1': return 1;
+		case '2': return 2;
+		case '3': return 3;
+		case '4': return 4;
+		case '5': return 5;
+		case '6': return 6;
+		case '7': return 7;
+		case '8': return 8;
+		case '9': return 9;
+		case 'a': case 'A': return 10;
+		case 'b': case 'B': return 11;
+		case 'c': case 'C': return 12;
+		case 'd': case 'D': return 13;
+		case 'e': case 'E': return 14;
+		case 'f': case 'F': return 15;
+		default: assert(false); return 0;
+		}
+	}
+	
+	static std::uint16_t getIntegerValue(const Token &token)
+	{
+		unsigned base;
+		switch (token.type)
+		{
+		case Tk_Decimal: base = 10; break;
+		case Tk_Hexadecimal: base = 16; break;
+		case Tk_Octal: base = 8; break;
+		case Tk_Binary: base = 2; break;
+		default:
+			assert(false);
+			return 0;
+		}
+		
+		unsigned value = 0;
+		for (auto i = token.begin; i != token.end; ++i)
+		{
+			value *= base;
+			value += getDigitValue(*i);
+		}
+		
+		return static_cast<std::uint16_t>(value);
+	}
+	
+	
 	SyntaxException::SyntaxException(
 		SourceIterator position,
 		SyntaxErrorCode error
@@ -157,6 +221,27 @@ namespace dcpupp
 		return true;
 	}
 	
+	
+	void PC::print(std::ostream &os) const
+	{
+		os << "PC";
+	}
+	
+	std::uint16_t PC::getExtraWordCount() const
+	{
+		return 0;
+	}
+	
+	bool PC::hasExtraWord(
+		unsigned &typeCode,
+		std::uint16_t &extra,
+		ILabelResolver &resolver
+		) const
+	{
+		typeCode = 0x1c;
+		return false;
+	}
+			
 	
 	WordPtr::WordPtr(std::unique_ptr<Constant> extra)
 		: extra(std::move(extra))
@@ -335,6 +420,38 @@ namespace dcpupp
 	}
 	
 	
+	Data::Data(std::vector<std::uint16_t> value)
+		: value(std::move(value))
+	{
+	}
+	
+	void Data::print(std::ostream &os) const
+	{
+		bool comma = false;
+		for (auto i = value.begin(); i != value.end(); ++i)
+		{
+			if (comma) os << ", "; else comma = true;
+			os << *i;
+		}
+	}
+	
+	std::uint16_t Data::getSizeInMemory() const
+	{
+		return value.size();
+	}
+	
+	void Data::compile(
+		IMemoryWriter &destination,
+		ILabelResolver &resolver
+		) const
+	{
+		for (auto i = value.begin(); i != value.end(); ++i)
+		{
+			destination.write(*i);
+		}
+	}
+	
+	
 	Line::Line()
 	{
 	}
@@ -381,6 +498,7 @@ namespace dcpupp
 		Scanner &scanner
 		)
 		: m_scanner(scanner)
+		, m_isTokenCached(false)
 	{
 	}
 	
@@ -393,10 +511,10 @@ namespace dcpupp
 	{
 		std::string label;
 		
-		const Token first = m_scanner.nextToken();
+		const Token first = popToken();
 		if (first.type == Tk_Colon)
 		{
-			const Token labelToken = m_scanner.nextToken();
+			const Token labelToken = popToken();
 			if (labelToken.type != Tk_Identifier)
 			{
 				throw SyntaxException(labelToken.begin, SynErr_LabelNameExpected);
@@ -414,7 +532,7 @@ namespace dcpupp
 		
 		std::unique_ptr<Statement> statement;
 		
-		const Token keyword = m_scanner.nextToken();
+		const Token keyword = popToken();
 		
 		switch (keyword.type)
 		{
@@ -459,12 +577,36 @@ namespace dcpupp
 		return true;
 	}
 	
+	void Parser::resetCache()
+	{
+		m_isTokenCached = false;
+	}
+	
+	
+	Token Parser::peekToken()
+	{
+		assert(!m_isTokenCached);
+		m_cachedToken = m_scanner.nextToken();
+		m_isTokenCached = true;
+		return m_cachedToken;
+	}
+	
+	Token Parser::popToken()
+	{
+		if (m_isTokenCached)
+		{
+			m_isTokenCached = false;
+			return m_cachedToken;
+		}
+		
+		return m_scanner.nextToken();
+	}
 	
 	std::unique_ptr<Statement> Parser::parseBinaryStatement(TokenId operation)
 	{
 		auto a = parseArgument();
 		
-		const Token comma = m_scanner.nextToken();
+		const Token comma = popToken();
 		if (comma.type != Tk_Comma)
 		{
 			throw SyntaxException(comma.begin, SynErr_CommaExpected);
@@ -485,8 +627,42 @@ namespace dcpupp
 	
 	std::unique_ptr<Statement> Parser::parseData()
 	{
-		assert(!"TODO");
-		return std::unique_ptr<Statement>();
+		std::vector<std::uint16_t> data;
+		
+		for (;;)
+		{
+			const Token current = popToken();
+			
+			if (current.type == Tk_String)
+			{
+				for (auto i = current.begin; i != current.end; ++i)
+				{
+					data.push_back(*i);
+				}
+			}
+			else if (isIntegerLiteral(current.type))
+			{
+				data.push_back(getIntegerValue(current));
+			}
+			else
+			{
+				throw SyntaxException(current.begin, SynErr_DataExpected);
+			}
+			
+			const Token comma = peekToken();
+			if (comma.type == Tk_Comma)
+			{
+				popToken();
+				continue;
+			}
+			else
+			{
+				break;
+			}
+		}
+		
+		return std::unique_ptr<Statement>(
+			new Data(std::move(data)));
 	}
 	
 	static bool isUniversalRegister(TokenId token)
@@ -508,77 +684,14 @@ namespace dcpupp
 		}
 	}
 	
-	static bool isIntegerLiteral(TokenId token)
-	{
-		switch (token)
-		{
-		case Tk_Decimal:
-		case Tk_Hexadecimal:
-		case Tk_Octal:
-		case Tk_Binary:
-			return true;
-			
-		default:
-			return false;
-		}
-	}
-	
-	static unsigned getDigitValue(char c)
-	{
-		switch (c)
-		{
-		case '0': return 0;
-		case '1': return 1;
-		case '2': return 2;
-		case '3': return 3;
-		case '4': return 4;
-		case '5': return 5;
-		case '6': return 6;
-		case '7': return 7;
-		case '8': return 8;
-		case '9': return 9;
-		case 'a': case 'A': return 10;
-		case 'b': case 'B': return 11;
-		case 'c': case 'C': return 12;
-		case 'd': case 'D': return 13;
-		case 'e': case 'E': return 14;
-		case 'f': case 'F': return 15;
-		default: assert(false); return 0;
-		}
-	}
-	
-	static std::uint16_t getIntegerValue(const Token &token)
-	{
-		unsigned base;
-		switch (token.type)
-		{
-		case Tk_Decimal: base = 10; break;
-		case Tk_Hexadecimal: base = 16; break;
-		case Tk_Octal: base = 8; break;
-		case Tk_Binary: base = 2; break;
-		default:
-			assert(false);
-			return 0;
-		}
-		
-		unsigned value = 0;
-		for (auto i = token.begin; i != token.end; ++i)
-		{
-			value *= base;
-			value += getDigitValue(*i);
-		}
-		
-		return static_cast<std::uint16_t>(value);
-	}
-	
 	std::unique_ptr<Argument> Parser::parseArgument()
 	{
-		const Token firstToken = m_scanner.nextToken();
+		const Token firstToken = popToken();
 		switch (firstToken.type)
 		{
 		case Tk_LeftBracket:
 			{
-				auto secondToken = m_scanner.nextToken();
+				auto secondToken = popToken();
 				if (isUniversalRegister(secondToken.type))
 				{
 					expectRightBracket();
@@ -608,7 +721,12 @@ namespace dcpupp
 				return std::unique_ptr<Argument>(
 					new Word(std::unique_ptr<Constant>(
 						new LabelConstant(std::string(firstToken.begin, firstToken.end)))));
-				break;
+			}
+			
+		case Tk_PC:
+			{
+				return std::unique_ptr<Argument>(
+					new PC);
 			}
 			
 		default:
@@ -630,7 +748,7 @@ namespace dcpupp
 	
 	void Parser::expectRightBracket()
 	{
-		const auto bracketToken = m_scanner.nextToken();
+		const auto bracketToken = popToken();
 		if (bracketToken.type != Tk_RightBracket)
 		{
 			throw SyntaxException(bracketToken.begin, SynErr_MissingRightBracket);

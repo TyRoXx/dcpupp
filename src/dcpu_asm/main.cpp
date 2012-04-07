@@ -43,11 +43,11 @@ struct ErrorHandler : ICompilerErrorHandler
 		cerr << "Syntax error (" << (getLine(e.position) + 1) << "): ";
 		switch (e.error)
 		{
-		case SynErr_LabelNameExpected: cerr << "Label name expected"; break;
-		case SynErr_MissingRightBracket: cerr << "Closing bracket ']' expected"; break;
-		case SynErr_KeywordExpected: cerr << "Keyword expected"; break;
-		case SynErr_CommaExpected: cerr << "Comma expected"; break;
-		case SynErr_ArgumentExpected: cerr << "Argument expected"; break;
+		case SynErr_LabelNameExpected: cerr << "Label name expected: " << getRestOfLine(e.position); break;
+		case SynErr_MissingRightBracket: cerr << "Closing bracket ']' expected: " << getRestOfLine(e.position); break;
+		case SynErr_KeywordExpected: cerr << "Keyword expected: " << getRestOfLine(e.position); break;
+		case SynErr_CommaExpected: cerr << "Comma expected: " << getRestOfLine(e.position); break;
+		case SynErr_ArgumentExpected: cerr << "Argument expected: " << getRestOfLine(e.position); break;
 		default: cerr << "Unknown error"; break;
 		}
 		cerr << endl;
@@ -67,6 +67,12 @@ private:
 	unsigned getLine(SourceIterator position) const
 	{
 		return std::count(begin, position, '\n');
+	}
+	
+	std::string getRestOfLine(SourceIterator position) const
+	{
+		return std::string(position,
+			std::find(position, end, '\n'));
 	}
 };
 

@@ -141,6 +141,20 @@ namespace dcpupp
 		case '+': return eatToken(Tk_Plus);
 		case '[': return eatToken(Tk_LeftBracket);
 		case ']': return eatToken(Tk_RightBracket);
+		case '"':
+			{
+				++m_pos;
+				const auto strBegin = m_pos;
+				while ((m_pos != m_end) &&
+					(*m_pos != '"'))
+				{
+					++m_pos;
+				}
+				const auto strEnd = m_pos;
+				++m_pos;
+				return Token(Tk_String, strBegin, strEnd);
+			}
+			
 		default:
 			{
 				if (isAlphabetic(firstChar) || (firstChar == '_'))

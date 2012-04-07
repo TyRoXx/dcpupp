@@ -18,6 +18,7 @@ namespace dcpupp
 		SynErr_KeywordExpected,
 		SynErr_CommaExpected,
 		SynErr_ArgumentExpected,
+		SynErr_DataExpected,
 	};
 	
 	struct SyntaxException : Exception
@@ -323,11 +324,16 @@ namespace dcpupp
 			);
 		Scanner &getScanner() const;
 		bool parseLine(Line &line);
+		void resetCache();
 		
 	private:
 	
 		Scanner &m_scanner;
+		Token m_cachedToken;
+		bool m_isTokenCached;
 		
+		Token peekToken();
+		Token popToken();
 		std::unique_ptr<Statement> parseBinaryStatement(TokenId operation);
 		std::unique_ptr<Statement> parseUnaryStatement(TokenId operation);
 		std::unique_ptr<Statement> parseData();
