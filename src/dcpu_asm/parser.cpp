@@ -222,6 +222,90 @@ namespace dcpupp
 	}
 	
 	
+	void Pop::print(std::ostream &os) const
+	{
+		os << "POP";
+	}
+	
+	std::uint16_t Pop::getExtraWordCount() const
+	{
+		return 0;
+	}
+	
+	bool Pop::hasExtraWord(
+		unsigned &typeCode,
+		std::uint16_t &extra,
+		ILabelResolver &resolver
+		) const
+	{
+		typeCode = 0x18;
+		return false;
+	}
+	
+	
+	void Peek::print(std::ostream &os) const
+	{
+		os << "PEEK";
+	}
+	
+	std::uint16_t Peek::getExtraWordCount() const
+	{
+		return 0;
+	}
+	
+	bool Peek::hasExtraWord(
+		unsigned &typeCode,
+		std::uint16_t &extra,
+		ILabelResolver &resolver
+		) const
+	{
+		typeCode = 0x19;
+		return false;
+	}
+	
+	
+	void Push::print(std::ostream &os) const
+	{
+		os << "PUSH";
+	}
+	
+	std::uint16_t Push::getExtraWordCount() const
+	{
+		return 0;
+	}
+	
+	bool Push::hasExtraWord(
+		unsigned &typeCode,
+		std::uint16_t &extra,
+		ILabelResolver &resolver
+		) const
+	{
+		typeCode = 0x1a;
+		return false;
+	}
+			
+			
+	void SP::print(std::ostream &os) const
+	{
+		os << "SP";
+	}
+	
+	std::uint16_t SP::getExtraWordCount() const
+	{
+		return 0;
+	}
+	
+	bool SP::hasExtraWord(
+		unsigned &typeCode,
+		std::uint16_t &extra,
+		ILabelResolver &resolver
+		) const
+	{
+		typeCode = 0x1b;
+		return false;
+	}
+			
+			
 	void PC::print(std::ostream &os) const
 	{
 		os << "PC";
@@ -239,6 +323,27 @@ namespace dcpupp
 		) const
 	{
 		typeCode = 0x1c;
+		return false;
+	}
+			
+			
+	void O::print(std::ostream &os) const
+	{
+		os << "O";
+	}
+	
+	std::uint16_t O::getExtraWordCount() const
+	{
+		return 0;
+	}
+	
+	bool O::hasExtraWord(
+		unsigned &typeCode,
+		std::uint16_t &extra,
+		ILabelResolver &resolver
+		) const
+	{
+		typeCode = 0x1d;
 		return false;
 	}
 			
@@ -340,7 +445,21 @@ namespace dcpupp
 		IMemoryWriter &destination,
 		ILabelResolver &resolver) const
 	{
-		assert(!"TODO");
+		const unsigned opcode = 0;
+		unsigned a_code = (operation - Tk_Jsr), b_code;
+		std::uint16_t b_extra;
+		const bool hasBExtra = argument->hasExtraWord(b_code, b_extra, resolver);
+		
+		destination.write(
+			(b_code << 10) |
+			(a_code << 4) |
+			opcode
+			);
+		
+		if (hasBExtra)
+		{
+			destination.write(b_extra);
+		}
 	}
 	
 	
@@ -511,7 +630,7 @@ namespace dcpupp
 	{
 		std::string label;
 		
-		const Token first = popToken();
+		Token first = popToken();
 		if (first.type == Tk_Colon)
 		{
 			const Token labelToken = popToken();
@@ -523,6 +642,8 @@ namespace dcpupp
 			label.assign(
 				labelToken.begin,
 				labelToken.end);
+				
+			first = popToken();
 		}
 		
 		else if (first.type == Tk_EndOfFile)
@@ -532,8 +653,7 @@ namespace dcpupp
 		
 		std::unique_ptr<Statement> statement;
 		
-		const Token keyword = popToken();
-		
+		const Token keyword = first;
 		switch (keyword.type)
 		{
 		case Tk_Set:
@@ -723,11 +843,23 @@ namespace dcpupp
 						new LabelConstant(std::string(firstToken.begin, firstToken.end)))));
 			}
 			
+		case Tk_Pop:
+			return std::unique_ptr<Argument>(new Pop);
+			
+		case Tk_Peek:
+			return std::unique_ptr<Argument>(new Peek);
+			
+		case Tk_Push:
+			return std::unique_ptr<Argument>(new Push);
+			
+		case Tk_SP:
+			return std::unique_ptr<Argument>(new SP);
+			
 		case Tk_PC:
-			{
-				return std::unique_ptr<Argument>(
-					new PC);
-			}
+			return std::unique_ptr<Argument>(new PC);
+			
+		case Tk_O:
+			return std::unique_ptr<Argument>(new O);
 			
 		default:
 			if (isUniversalRegister(firstToken.type))
