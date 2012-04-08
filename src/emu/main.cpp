@@ -21,11 +21,15 @@ struct Options
 	unsigned sleepMs;
 	unsigned videoAddress;
 	unsigned updateInterval;
+	unsigned consoleWidth;
+	unsigned consoleHeight;
 	
 	Options()
 		: sleepMs(10)
 		, videoAddress(32768) //0x8000
 		, updateInterval(5)
+		, consoleWidth(32)
+		, consoleHeight(12)
 	{
 	}
 };
@@ -58,6 +62,15 @@ int main(int argc, char **argv)
 
 			case 'u':
 				options.updateInterval = stoi(arg.c_str() + 2);
+				break;
+
+			case 'w':
+				options.consoleWidth = stoi(arg.c_str() + 2);
+				break;
+
+			case 'h':
+				options.consoleHeight = stoi(arg.c_str() + 2);
+				break;
 			
 			default:
 				cerr << "Invalid option '" << arg << "'";
@@ -108,6 +121,24 @@ int main(int argc, char **argv)
 		{
 		}
 
+		void setDefaultTextColors()
+		{
+#ifdef WIN32
+			SetConsoleTextAttribute(console,
+				FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+#endif
+		}
+
+		void printVerticalBar()
+		{
+			fputc(' ', stdout);
+			for (size_t x = 0; x < options.consoleWidth; ++x)
+			{
+				fputc('-', stdout);
+			}
+			fputc('\n', stdout);
+		}
+
 		void printInfo()
 		{
 #ifdef WIN32
@@ -125,24 +156,25 @@ int main(int argc, char **argv)
 			write(1, "\E[H\E[2J", 7);
 #endif
 
-#ifdef WIN32
-			SetConsoleTextAttribute(console,
-				FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
-#endif
-			for (size_t i = 0; i < 8; ++i)
-			{
-				printf("%c: %04x, ", "ABCXYZIJ"[i], machine.registers[i]);
-			}
+			setDefaultTextColors();
+			printf("A: %04x, B: %04x, C: %04x\n", machine.registers[0],
+				machine.registers[1], machine.registers[2]);
+			printf("X: %04x, Y: %04x, Z: %04x\n", machine.registers[3],
+				machine.registers[4], machine.registers[5]);
+			printf("I: %04x, J: %04x\n", machine.registers[6],
+				machine.registers[7]);
+
 			puts("");
 			printf("SP: %04x, PC: %04x, O: %04x\n", machine.sp, machine.pc, machine.o);
 
-			const size_t width = 32, height = 12;
-			for (size_t y = 0; y < height; ++y)
+			printVerticalBar();
+			for (size_t y = 0; y < options.consoleHeight; ++y)
 			{
-				for (size_t x = 0; x < width; ++x)
+				fputc('|', stdout);
+				for (size_t x = 0; x < options.consoleWidth; ++x)
 				{
 					const size_t charAddress = options.videoAddress +
-						y * width +
+						y * options.consoleWidth +
 						x;
 					const Word c = machine.memory[charAddress];
 
@@ -150,21 +182,13 @@ int main(int argc, char **argv)
 					SetConsoleTextAttribute(console, c >> 8);
 #endif
 					fputc((char)c, stdout);
-					//write(1, &c, 1);
 				}
-
+				setDefaultTextColors();
+				fputc('|', stdout);
 				fputc('\n', stdout);
 			}
-
+			printVerticalBar();
 			fflush(stdout);
-			if (options.sleepMs)
-			{
-#ifdef WIN32
-				Sleep(options.sleepMs);
-#else
-				usleep(options.sleepMs * 1000);
-#endif
-			}
 		}
 		
 		bool startInstruction()
@@ -174,6 +198,15 @@ int main(int argc, char **argv)
 			{
 				printInfo();
 				intervalCounter = 0;
+			}
+
+			if (options.sleepMs)
+			{
+#ifdef WIN32
+				Sleep(options.sleepMs);
+#else
+				usleep(options.sleepMs * 1000);
+#endif
 			}
 			return true;
 		}
