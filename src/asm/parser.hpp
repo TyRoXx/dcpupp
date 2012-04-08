@@ -3,6 +3,7 @@
 
 
 #include "../common/operations.hpp"
+#include "../common/types.hpp"
 #include "scanner.hpp"
 #include <cstdint>
 #include <memory>
@@ -293,15 +294,24 @@ namespace dcpupp
 	
 	struct Data : Statement
 	{
-		std::vector<std::uint16_t> value;
+		struct IElement;
+		typedef std::vector<std::unique_ptr<IElement>> ValueElements;
 		
-		explicit Data(std::vector<std::uint16_t> value);
+		ValueElements value;
+		
+		explicit Data(ValueElements value);
+		~Data();
 		virtual void print(std::ostream &os) const;
 		virtual std::uint16_t getSizeInMemory() const;
 		virtual void compile(
 			IMemoryWriter &destination,
 			ILabelResolver &resolver
 			) const;
+		
+		static std::unique_ptr<IElement> createFixedElement(
+			std::vector<Word> value);
+		static std::unique_ptr<IElement> createSymbolElement(
+			std::string name);
 	};
 	
 	struct Line

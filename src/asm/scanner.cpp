@@ -130,9 +130,41 @@ namespace dcpupp
 			{
 				++m_pos;
 				const auto strBegin = m_pos;
-				while ((m_pos != m_end) &&
-					(*m_pos != '"'))
+				for (;;)
 				{
+					if (m_pos == m_end)
+					{
+						throw LexicalException(strBegin, LexErr_IncompleteString);
+					}
+					else if (*m_pos == '\"')
+					{
+						break;
+					}
+					else if (*m_pos == '\\')
+					{
+						++m_pos;
+						if (m_pos == m_end)
+						{
+							throw LexicalException(strBegin, LexErr_IncompleteString);
+						}
+						
+						//the scanner assures that the string is valid,
+						//the parser will decode escape sequences
+						switch (*m_pos)
+						{
+						case '\t':
+						case '\n':
+						case '\r':
+						case '\\':
+						case '\'':
+						case '\"':
+							break;
+							
+						default:
+							throw LexicalException(m_pos, LexErr_InvalidEscapeSequence);
+						}
+					}
+					
 					++m_pos;
 				}
 				const auto strEnd = m_pos;

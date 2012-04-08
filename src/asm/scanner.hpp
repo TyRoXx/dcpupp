@@ -57,6 +57,8 @@ namespace dcpupp
 		LexErr_InvalidCharacter,
 		LexErr_IncompleteInteger,
 		LexErr_UnexpectedCharacter,
+		LexErr_IncompleteString,
+		LexErr_InvalidEscapeSequence,
 	};
 	
 	struct Exception : std::runtime_error

@@ -562,19 +562,79 @@ namespace dcpupp
 	}
 	
 	
-	Data::Data(std::vector<std::uint16_t> value)
+	struct Data::IElement
+	{
+		virtual ~IElement()
+		{
+		}
+		
+		virtual void getValue(
+			IMemoryWriter &destination,
+			ILabelResolver &resolver
+		) const = 0;
+	};
+	
+	struct FixedDataElement : Data::IElement
+	{
+		explicit FixedDataElement(std::vector<Word> value)
+			: m_value(std::move(value))
+		{
+		}
+		
+		virtual void getValue(
+			IMemoryWriter &destination,
+			ILabelResolver &resolver
+		) const
+		{
+			for (auto i = m_value.begin(); i != m_value.end(); ++i)
+			{
+				destination.write(*i);
+			}
+		}
+		
+	private:
+	
+		std::vector<Word> m_value;
+	};
+	
+	struct SymbolDataElement : Data::IElement
+	{
+		explicit SymbolDataElement(std::string name)
+			: m_name(std::move(name))
+		{
+		}
+		
+		virtual void getValue(
+			IMemoryWriter &destination,
+			ILabelResolver &resolver
+		) const
+		{
+			Word value;
+			if (!resolver.resolve(m_name, value))
+			{
+				assert(!"TODO");
+			}
+			destination.write(value);
+		}
+		
+	private:
+	
+		std::string m_name;
+	};
+	
+		
+	Data::Data(ValueElements value)
 		: value(std::move(value))
+	{
+	}
+	
+	Data::~Data()
 	{
 	}
 	
 	void Data::print(std::ostream &os) const
 	{
-		bool comma = false;
-		for (auto i = value.begin(); i != value.end(); ++i)
-		{
-			if (comma) os << ", "; else comma = true;
-			os << *i;
-		}
+		assert(!"TODO");
 	}
 	
 	std::uint16_t Data::getSizeInMemory() const
@@ -589,8 +649,24 @@ namespace dcpupp
 	{
 		for (auto i = value.begin(); i != value.end(); ++i)
 		{
-			destination.write(*i);
+			(*i)->getValue(
+				destination,
+				resolver);
 		}
+	}
+		
+	std::unique_ptr<Data::IElement> Data::createFixedElement(
+		std::vector<Word> value)
+	{
+		return std::unique_ptr<Data::IElement>(new FixedDataElement(
+			std::move(value)));
+	}
+	
+	std::unique_ptr<Data::IElement> Data::createSymbolElement(
+		std::string name)
+	{
+		return std::unique_ptr<Data::IElement>(new SymbolDataElement(
+			std::move(name)));
 	}
 	
 		
@@ -810,7 +886,7 @@ namespace dcpupp
 	
 	std::unique_ptr<Statement> Parser::parseData()
 	{
-		std::vector<std::uint16_t> data;
+		Data::ValueElements data;
 		
 		for (;;)
 		{
@@ -818,14 +894,48 @@ namespace dcpupp
 			
 			if (current.type == Tk_String)
 			{
+				std::vector<Word> string;
+				string.reserve(std::distance(current.begin, current.end));
+				
 				for (auto i = current.begin; i != current.end; ++i)
 				{
-					data.push_back(*i);
+					auto c = *i;
+					if (c == '\\')
+					{
+						++i;
+						assert((i != current.end) &&
+							"Scanner checks validity of escape sequences");
+						
+						const auto d = *i;
+						switch (d)
+						{
+						case 't': c = '\t'; break;
+						case 'n': c = '\n'; break;
+						case 'r': c = '\n'; break;
+						case '\\': c = '\\'; break;
+						case '\'': c = '\''; break;
+						case '\"': c = '\"'; break;
+						default: assert(!"Cannot happen"); break;
+						}
+					}
+					
+					string.push_back(c);
 				}
+				
+				//TODO: optimize this by combining consecutive fixed elements
+				data.push_back(Data::createFixedElement(std::move(string)));
 			}
 			else if (isIntegerLiteral(current.type))
 			{
-				data.push_back(getIntegerValue(current));
+				std::vector<Word> number;
+				number.push_back(getIntegerValue(current));
+				
+				data.push_back(Data::createFixedElement(std::move(number)));
+			}
+			else if (current.type == Tk_Identifier)
+			{
+				data.push_back(Data::createSymbolElement(
+					std::string(current.begin, current.end)));
 			}
 			else
 			{

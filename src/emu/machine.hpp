@@ -3,21 +3,19 @@
 
 
 #include "../common/operations.hpp"
+#include "../common/types.hpp"
 #include <array>
 #include <vector>
-#include <cstdint>
 #include <istream>
 
 
 namespace dcpupp
 {
-	typedef std::uint16_t Word;
 	
 	enum
 	{
 		UniversalRegisterCount = 8,
 		MemorySizeInWords = 0x10000,
-		MaxWord = 0xffff,
 	};
 	
 	struct Machine

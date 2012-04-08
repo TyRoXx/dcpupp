@@ -33,6 +33,8 @@ struct ErrorHandler : ICompilerErrorHandler
 		case LexErr_InvalidCharacter: cerr << "Invalid character '" << *e.position << "'"; break;
 		case LexErr_IncompleteInteger: cerr << "Incomplete integer"; break;
 		case LexErr_UnexpectedCharacter: cerr << "Unexpected character '" << *e.position << "'"; break;
+		case LexErr_IncompleteString: cerr << "Incomplete string"; break;
+		case LexErr_InvalidEscapeSequence: cerr << "Invalid escape character '" << *e.position << "'"; break;
 		default: cerr << "Unknown error"; break;
 		}
 		cerr << endl;
