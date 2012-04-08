@@ -590,11 +590,7 @@ namespace dcpupp
 		}
 	}
 	
-	
-	Line::Line()
-	{
-	}
-	
+		
 	Line::Line(
 		std::string label,
 		std::unique_ptr<Statement> statement,
@@ -607,15 +603,19 @@ namespace dcpupp
 	}
 	
 	Line::Line(Line &&other)
+		: label(std::move(other.label))
+		, statement(std::move(other.statement))
+		, begin(other.begin)
 	{
-		swap(other);
 	}
 	
 	Line &Line::operator = (Line &&other)
 	{
 		if (this != &other)
 		{
-			swap(other);
+			label = std::move(other.label);
+			statement = std::move(other.statement);
+			begin = other.begin;
 		}
 		return *this;
 	}
@@ -646,7 +646,7 @@ namespace dcpupp
 		return m_scanner;
 	}
 	
-	bool Parser::parseLine(Line &line)
+	Line Parser::parseLine()
 	{
 		std::string label;
 		
@@ -668,12 +668,11 @@ namespace dcpupp
 			first = peekToken();
 			if (first.type == Tk_Colon)
 			{
-				line = Line(
+				return Line(
 					std::move(label),
 					std::unique_ptr<Statement>(),
 					lineBegin
 					);
-				return true;
 			}
 			
 			popToken();
@@ -681,7 +680,10 @@ namespace dcpupp
 		
 		else if (first.type == Tk_EndOfFile)
 		{
-			return false;
+			return Line(
+				label,
+				std::unique_ptr<Statement>(),
+				lineBegin);
 		}
 		
 		std::unique_ptr<Statement> statement;
@@ -725,12 +727,11 @@ namespace dcpupp
 			throw SyntaxException(keyword.begin, SynErr_KeywordExpected);
 		}
 		
-		line = Line(
+		return Line(
 			std::move(label),
 			std::move(statement),
 			lineBegin
 			);
-		return true;
 	}
 	
 	void Parser::resetCache()

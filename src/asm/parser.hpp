@@ -309,7 +309,6 @@ namespace dcpupp
 		std::unique_ptr<Statement> statement;
 		SourceIterator begin;
 		
-		Line();
 		explicit Line(
 			std::string label,
 			std::unique_ptr<Statement> statement,
@@ -327,7 +326,7 @@ namespace dcpupp
 			Scanner &scanner
 			);
 		Scanner &getScanner() const;
-		bool parseLine(Line &line);
+		Line parseLine();
 		void resetCache();
 		
 	private:

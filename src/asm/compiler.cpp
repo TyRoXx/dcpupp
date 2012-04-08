@@ -53,13 +53,41 @@ namespace dcpupp
 		
 		for (;;)
 		{
-			Line line;
 			try
 			{
-				if (!m_parser.parseLine(line))
+				auto line = m_parser.parseLine();
+				if (line.label.empty() && !line.statement)
 				{
 					break;
 				}
+
+				if (!line.label.empty())
+				{
+					const auto i = labelManager.labels.find(line.label);
+					if (i == labelManager.labels.end())
+					{
+						Label label;
+						label.address = positionInMemory;
+						label.line = lines.size();
+
+						labelManager.labels.insert(std::make_pair(
+							line.label,
+							label));
+					}
+					else
+					{
+						success = false;
+						const Line &previousLine = lines[i->second.line];
+						m_errorHandler.handleRedefinition(
+							previousLine.begin,
+							line.begin,
+							line.label
+							);
+					}
+				}
+
+				positionInMemory += line.getSizeInMemory();
+				lines.push_back(std::move(line));
 			}
 			catch (const LexicalException &e)
 			{
@@ -67,7 +95,6 @@ namespace dcpupp
 				m_errorHandler.handleError(e);
 				m_parser.getScanner().skipLine();
 				m_parser.resetCache();
-				continue;
 			}
 			catch (const SyntaxException &e)
 			{
@@ -75,36 +102,7 @@ namespace dcpupp
 				m_errorHandler.handleError(e);
 				m_parser.getScanner().skipLine();
 				m_parser.resetCache();
-				continue;
 			}
-			
-			if (!line.label.empty())
-			{
-				const auto i = labelManager.labels.find(line.label);
-				if (i == labelManager.labels.end())
-				{
-					Label label;
-					label.address = positionInMemory;
-					label.line = lines.size();
-					
-					labelManager.labels.insert(std::make_pair(
-						line.label,
-						label));
-				}
-				else
-				{
-					success = false;
-					const Line &previousLine = lines[i->second.line];
-					m_errorHandler.handleRedefinition(
-						previousLine.begin,
-						line.begin,
-						line.label
-						);
-				}
-			}
-			
-			positionInMemory += line.getSizeInMemory();
-			lines.push_back(std::move(line));
 		}
 		
 		struct CodeWriter : IMemoryWriter
