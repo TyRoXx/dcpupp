@@ -185,11 +185,13 @@ namespace dcpupp
 							return Token(Tk_Decimal, m_pos - 1, m_pos);
 						}
 						
+						const auto baseMarker = std::tolower(*m_pos);
+
 						//hex, binary
-						if (*m_pos == 'x' ||
-							*m_pos == 'b')
+						if (baseMarker == 'x' ||
+							baseMarker == 'b')
 						{
-							const auto base = (*m_pos == 'x' ? 16 : 2);
+							const auto base = (baseMarker == 'x' ? 16 : 2);
 							
 							++m_pos;
 							if (m_pos == m_end ||
