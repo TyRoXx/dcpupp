@@ -2,8 +2,8 @@
 #define DCPUPP_ASM_PARSER_HPP
 
 
-#include "../common/operations.hpp"
-#include "../common/types.hpp"
+#include "common/operations.hpp"
+#include "common/types.hpp"
 #include "scanner.hpp"
 #include <cstdint>
 #include <memory>

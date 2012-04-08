@@ -2,8 +2,8 @@
 #define DCPUPP_EMU_MACHINE_HPP
 
 
-#include "../common/operations.hpp"
-#include "../common/types.hpp"
+#include "common/operations.hpp"
+#include "common/types.hpp"
 #include <array>
 #include <vector>
 #include <istream>
