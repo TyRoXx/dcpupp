@@ -70,9 +70,11 @@ namespace dcpupp
 			return memory[memory[pc++]];
 			
 		case 0x1f:
+			//not writeable
 			return memory[pc++];
 			
 		default:
+			//not writeable
 			return SmallLiterals[argument - 32];
 		}
 	}

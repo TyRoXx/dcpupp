@@ -86,6 +86,7 @@ namespace dcpupp
 			const auto instr = memory[pc];
 			++pc;
 			const auto a = (instr >> 4) & 0x3f;
+			const bool isAWriteable = (a < 0x1f);
 			const auto op = (instr & 0x0f);
 			Word *a_ref, *b_ref;
 			
@@ -120,93 +121,126 @@ namespace dcpupp
 				
 			case Op_Set:
 				{
-					*a_ref = *b_ref;
+					if (isAWriteable)
+					{
+						*a_ref = *b_ref;
+					}
 					break;
 				}
 				
 			case Op_Add:
 				{
-					const auto result = *a_ref + *b_ref;
-					o = (result > MaxWord);
-					*a_ref = static_cast<Word>(result);
+					if (isAWriteable)
+					{
+						const auto result = *a_ref + *b_ref;
+						o = (result > MaxWord);
+						*a_ref = static_cast<Word>(result);
+					}
 					break;
 				}
 				
 			case Op_Sub:
 				{
-					const auto result = *a_ref - *b_ref;
-					o = (result > MaxWord) ? MaxWord : 0;
-					*a_ref = static_cast<Word>(result);
+					if (isAWriteable)
+					{
+						const auto result = *a_ref - *b_ref;
+						o = (result > MaxWord) ? MaxWord : 0;
+						*a_ref = static_cast<Word>(result);
+					}
 					break;
 				}
 				
 			case Op_Mul:
 				{
-					const auto result = *a_ref * *b_ref;
-					o = (result >> 16);
-					*a_ref = static_cast<Word>(result);
+					if (isAWriteable)
+					{
+						const auto result = *a_ref * *b_ref;
+						o = (result >> 16);
+						*a_ref = static_cast<Word>(result);
+					}
 					break;
 				}
 				
 			case Op_Div:
 				{
-					if (*b_ref == 0)
+					if (isAWriteable)
 					{
-						*a_ref = o = 0;
-					}
-					else
-					{
-						const auto result = *a_ref / *b_ref;
-						o = ((*a_ref << 16) / *b_ref);
-						*a_ref = static_cast<Word>(result);
+						if (*b_ref == 0)
+						{
+							*a_ref = o = 0;
+						}
+						else
+						{
+							const auto result = *a_ref / *b_ref;
+							o = ((*a_ref << 16) / *b_ref);
+							*a_ref = static_cast<Word>(result);
+						}
 					}
 					break;
 				}
 				
 			case Op_Mod:
 				{
-					if (*b_ref == 0)
+					if (isAWriteable)
 					{
-						*a_ref = 0;
-					}
-					else
-					{
-						*a_ref %= *b_ref;
+						if (*b_ref == 0)
+						{
+							*a_ref = 0;
+						}
+						else
+						{
+							*a_ref %= *b_ref;
+						}
 					}
 					break;
 				}
 				
 			case Op_Shl:
 				{
-					const auto result = *a_ref << *b_ref;
-					o = (result >> 16);
-					*a_ref = static_cast<Word>(result);
+					if (isAWriteable)
+					{
+						const auto result = *a_ref << *b_ref;
+						o = (result >> 16);
+						*a_ref = static_cast<Word>(result);
+					}
 					break;
 				}
 				
 			case Op_Shr:
 				{
-					const auto result = *a_ref >> *b_ref;
-					o = ((*a_ref << 16) >> *b_ref);
-					*a_ref = static_cast<Word>(result);
+					if (isAWriteable)
+					{
+						const auto result = *a_ref >> *b_ref;
+						o = ((*a_ref << 16) >> *b_ref);
+						*a_ref = static_cast<Word>(result);
+					}
 					break;
 				}
 				
 			case Op_And:
 				{
-					*a_ref &= *b_ref;
+					if (isAWriteable)
+					{
+						*a_ref &= *b_ref;
+					}
 					break;
 				}
 				
 			case Op_Bor:
 				{
-					*a_ref |= *b_ref;
+					if (isAWriteable)
+					{
+						*a_ref |= *b_ref;
+					}
 					break;
 				}
 				
 			case Op_Xor:
 				{
-					*a_ref ^= *b_ref;
+					if (isAWriteable)
+					{
+						*a_ref ^= *b_ref;
+					}
 					break;
 				}
 				
