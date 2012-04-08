@@ -2,6 +2,7 @@
 #define DCPUPP_ASM_PARSER_HPP
 
 
+#include "../common/operations.hpp"
 #include "scanner.hpp"
 #include <cstdint>
 #include <memory>
@@ -257,11 +258,11 @@ namespace dcpupp
 	
 	struct UnaryStatement : Statement
 	{
-		TokenId operation;
+		NonBasicOperationId operation;
 		std::unique_ptr<Argument> argument;
 		
 		explicit UnaryStatement(
-			TokenId operation,
+			NonBasicOperationId operation,
 			std::unique_ptr<Argument> argument
 			);
 		virtual void print(std::ostream &os) const;
@@ -274,11 +275,11 @@ namespace dcpupp
 	
 	struct BinaryStatement : Statement
 	{
-		TokenId operation;
+		OperationId operation;
 		std::unique_ptr<Argument> a, b;
 		
 		explicit BinaryStatement(
-			TokenId operation,
+			OperationId operation,
 			std::unique_ptr<Argument> a,
 			std::unique_ptr<Argument> b
 			);
@@ -337,8 +338,8 @@ namespace dcpupp
 		
 		Token peekToken();
 		Token popToken();
-		std::unique_ptr<Statement> parseBinaryStatement(TokenId operation);
-		std::unique_ptr<Statement> parseUnaryStatement(TokenId operation);
+		std::unique_ptr<Statement> parseBinaryStatement(OperationId operation);
+		std::unique_ptr<Statement> parseUnaryStatement(NonBasicOperationId operation);
 		std::unique_ptr<Statement> parseData();
 		std::unique_ptr<Argument> parseArgument();
 		void expectRightBracket();

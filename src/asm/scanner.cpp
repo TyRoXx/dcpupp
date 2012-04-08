@@ -92,23 +92,6 @@ namespace dcpupp
 	
 	static const Keyword Keywords[] =
 	{
-		{"SET", Tk_Set},
-		{"ADD", Tk_Add},
-		{"SUB", Tk_Sub},
-		{"MUL", Tk_Mul},
-		{"DIV", Tk_Div},
-		{"MOD", Tk_Mod},
-		{"SHL", Tk_Shl},
-		{"SHR", Tk_Shr},
-		{"AND", Tk_And},
-		{"BOR", Tk_Bor},
-		{"XOR", Tk_Xor},
-		{"IFE", Tk_Ife},
-		{"IFN", Tk_Ifn},
-		{"IFG", Tk_Ifg},
-		{"IFB", Tk_Ifb},
-		{"JSR", Tk_Jsr},
-		{"DAT", Tk_Dat},
 		{"PUSH", Tk_Push},
 		{"PEEK", Tk_Peek},
 		{"POP", Tk_Pop},

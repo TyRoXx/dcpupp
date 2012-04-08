@@ -1,6 +1,9 @@
 #include "parser.hpp"
 #include <cassert>
+#include <array>
 #include <string>
+#include <algorithm>
+#include <cctype>
 
 
 namespace dcpupp
@@ -430,7 +433,7 @@ namespace dcpupp
 	
 	
 	UnaryStatement::UnaryStatement(
-		TokenId operation,
+		NonBasicOperationId operation,
 		std::unique_ptr<Argument> argument
 		)
 		: operation(operation)
@@ -443,7 +446,7 @@ namespace dcpupp
 		std::string name;
 		switch (operation)
 		{
-		case Tk_Jsr:
+		case NBOp_Jsr:
 			name = "JSR";
 			break;
 		
@@ -466,7 +469,7 @@ namespace dcpupp
 		ILabelResolver &resolver) const
 	{
 		const unsigned opcode = 0;
-		unsigned a_code = (operation - Tk_Jsr + 1), b_code;
+		unsigned a_code = (operation - NBOp_Jsr + 1), b_code;
 		std::uint16_t b_extra;
 		const bool hasBExtra = argument->hasExtraWord(b_code, b_extra, resolver);
 		
@@ -484,7 +487,7 @@ namespace dcpupp
 	
 	
 	BinaryStatement::BinaryStatement(
-		TokenId operation,
+		OperationId operation,
 		std::unique_ptr<Argument> a,
 		std::unique_ptr<Argument> b
 		)
@@ -499,21 +502,21 @@ namespace dcpupp
 		std::string name;
 		switch (operation)
 		{
-		case Tk_Set: name = "SET"; break;
-		case Tk_Add: name = "ADD"; break;
-		case Tk_Sub: name = "SUB"; break;
-		case Tk_Mul: name = "MUL"; break;
-		case Tk_Div: name = "DIV"; break;
-		case Tk_Mod: name = "MOD"; break;
-		case Tk_Shl: name = "SHL"; break;
-		case Tk_Shr: name = "SHR"; break;
-		case Tk_And: name = "AND"; break;
-		case Tk_Bor: name = "BOR"; break;
-		case Tk_Xor: name = "XOR"; break;
-		case Tk_Ife: name = "IFE"; break;
-		case Tk_Ifn: name = "IFN"; break;
-		case Tk_Ifg: name = "IFG"; break;
-		case Tk_Ifb: name = "IFB"; break;
+		case Op_Set: name = "SET"; break;
+		case Op_Add: name = "ADD"; break;
+		case Op_Sub: name = "SUB"; break;
+		case Op_Mul: name = "MUL"; break;
+		case Op_Div: name = "DIV"; break;
+		case Op_Mod: name = "MOD"; break;
+		case Op_Shl: name = "SHL"; break;
+		case Op_Shr: name = "SHR"; break;
+		case Op_And: name = "AND"; break;
+		case Op_Bor: name = "BOR"; break;
+		case Op_Xor: name = "XOR"; break;
+		case Op_Ife: name = "IFE"; break;
+		case Op_Ifn: name = "IFN"; break;
+		case Op_Ifg: name = "IFG"; break;
+		case Op_Ifb: name = "IFB"; break;
 		
 		default:
 			assert(false);
@@ -535,7 +538,7 @@ namespace dcpupp
 		IMemoryWriter &destination,
 		ILabelResolver &resolver) const
 	{
-		const unsigned opcode = (operation - Tk_Set + 1);
+		const unsigned opcode = (operation - Op_Set + 1);
 		unsigned a_code, b_code;
 		std::uint16_t a_extra, b_extra;
 		const bool hasAExtra = a->hasExtraWord(a_code, a_extra, resolver);
@@ -645,6 +648,31 @@ namespace dcpupp
 	{
 		return m_scanner;
 	}
+
+	struct OperationDefinition
+	{
+		std::string name;
+		OperationId id;
+	};
+
+	static const std::array<OperationDefinition, 15> Operations =
+	{{
+		{"SET", Op_Set},
+		{"ADD", Op_Add},
+		{"SUB", Op_Sub},
+		{"MUL", Op_Mul},
+		{"DIV", Op_Div},
+		{"MOD", Op_Mod},
+		{"SHL", Op_Shl},
+		{"SHR", Op_Shr},
+		{"AND", Op_And},
+		{"BOR", Op_Bor},
+		{"XOR", Op_Xor},
+		{"IFE", Op_Ife},
+		{"IFN", Op_Ifn},
+		{"IFG", Op_Ifg},
+		{"IFB", Op_Ifb},
+	}};
 	
 	Line Parser::parseLine()
 	{
@@ -689,44 +717,42 @@ namespace dcpupp
 		std::unique_ptr<Statement> statement;
 		
 		const Token keyword = first;
-		switch (keyword.type)
+		if (keyword.type != Tk_EndOfFile)
 		{
-		case Tk_Set:
-		case Tk_Add:
-		case Tk_Sub:
-		case Tk_Mul:
-		case Tk_Div:
-		case Tk_Mod:
-		case Tk_Shl:
-		case Tk_Shr:
-		case Tk_And:
-		case Tk_Bor:
-		case Tk_Xor:
-		case Tk_Ife:
-		case Tk_Ifn:
-		case Tk_Ifg:
-		case Tk_Ifb:
-			statement = parseBinaryStatement(keyword.type);
+			std::string identifier(keyword.begin, keyword.end);
+			std::transform(
+				identifier.begin(),
+				identifier.end(),
+				identifier.begin(),
+				[](char c) { return std::toupper(c); });
+
+			for (auto k = Operations.begin(); k != Operations.end(); ++k)
+			{
+				if (k->name == identifier)
+				{
+					statement = parseBinaryStatement(k->id);
+				}
+			}
+
+			if (!statement)
+			{
+				if (identifier == "JSR")
+				{
+					statement = parseUnaryStatement(NBOp_Jsr);
+				}
+				else if (identifier == "DAT")
+				{
+					statement = parseData();
+				}
+				else
+				{
+					throw SyntaxException(keyword.begin, SynErr_KeywordExpected);
+				}
+			}
+
 			assert(statement);
-			break;
-			
-		case Tk_Jsr:
-			statement = parseUnaryStatement(keyword.type);
-			assert(statement);
-			break;
-		
-		case Tk_Dat:
-			statement = parseData();
-			assert(statement);
-			break;
-			
-		case Tk_EndOfFile:
-			break;
-					
-		default:
-			throw SyntaxException(keyword.begin, SynErr_KeywordExpected);
 		}
-		
+				
 		return Line(
 			std::move(label),
 			std::move(statement),
@@ -759,7 +785,7 @@ namespace dcpupp
 		return m_scanner.nextToken();
 	}
 	
-	std::unique_ptr<Statement> Parser::parseBinaryStatement(TokenId operation)
+	std::unique_ptr<Statement> Parser::parseBinaryStatement(OperationId operation)
 	{
 		auto a = parseArgument();
 		
@@ -775,7 +801,7 @@ namespace dcpupp
 			new BinaryStatement(operation, std::move(a), std::move(b)));
 	}
 	
-	std::unique_ptr<Statement> Parser::parseUnaryStatement(TokenId operation)
+	std::unique_ptr<Statement> Parser::parseUnaryStatement(NonBasicOperationId operation)
 	{
 		auto argument = parseArgument();
 		return std::unique_ptr<Statement>(
