@@ -35,7 +35,7 @@ namespace dcpupp
 		template <class Context>
 		void run(Context &context);
 		
-		Word &getArgument(unsigned argument);
+		Word &getArgument(unsigned argument, Word &sp_);
 	};
 	
 	/*
@@ -62,29 +62,32 @@ namespace dcpupp
 	{
 		next_instruction: while (context.startInstruction())
 		{
-			const auto instr = memory[pc];
-			++pc;
+			const auto instr = memory[pc++];
 			const auto a = (instr >> 4) & 0x3f;
 			const bool isAWriteable = (a < 0x1f);
 			const auto op = (instr & 0x0f);
 			Word *a_ref, *b_ref;
-			
+			Word savedSp = sp;
+				
 			if (op != Op_NonBasic)
 			{
-				a_ref = &getArgument(a);
-				b_ref = &getArgument(instr >> 10);
-				if (skipNext)
-				{
-					skipNext = false;
-					goto next_instruction;
-				}
+				a_ref = &getArgument(a, savedSp);
 			}
+			
+			b_ref = &getArgument(instr >> 10, savedSp);
+			
+			if (skipNext)
+			{
+				skipNext = false;
+				goto next_instruction;
+			}
+		
+			sp = savedSp;
 			
 			switch (op)
 			{
 			case Op_NonBasic:
 				{
-					b_ref = &getArgument(instr >> 10);
 					switch (a)
 					{
 					case NBOp_Jsr: //JSR

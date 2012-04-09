@@ -225,8 +225,9 @@ namespace dcpupp
 	
 	void RegisterWordPtrArgument::print(std::ostream &os) const
 	{
+		os << "[";
 		extra->print(os);
-		os << "+" << UniversalRegisterNames[id];
+		os << "+" << UniversalRegisterNames[id] << "]";
 	}
 	
 	std::uint16_t RegisterWordPtrArgument::getExtraWordCount() const
@@ -579,6 +580,7 @@ namespace dcpupp
 		{
 		}
 		
+		virtual Word getSizeInMemory() const = 0;
 		virtual void getValue(
 			IMemoryWriter &destination,
 			ILabelResolver &resolver
@@ -590,6 +592,11 @@ namespace dcpupp
 		explicit FixedDataElement(std::vector<Word> value)
 			: m_value(std::move(value))
 		{
+		}
+		
+		virtual Word getSizeInMemory() const
+		{
+			return m_value.size();
 		}
 		
 		virtual void getValue(
@@ -616,6 +623,11 @@ namespace dcpupp
 			: m_name(std::move(name))
 			, m_position(position)
 		{
+		}
+		
+		virtual Word getSizeInMemory() const
+		{
+			return 1;
 		}
 		
 		virtual void getValue(
@@ -649,12 +661,17 @@ namespace dcpupp
 	
 	void Data::print(std::ostream &os) const
 	{
-		assert(!"TODO");
+		os << "(data)";
 	}
 	
 	std::uint16_t Data::getSizeInMemory() const
 	{
-		return value.size();
+		Word size = 0;
+		for (auto i = value.begin(); i != value.end(); ++i)
+		{
+			size += (*i)->getSizeInMemory();
+		}
+		return size;
 	}
 	
 	void Data::compile(
@@ -926,7 +943,7 @@ namespace dcpupp
 						{
 						case 't': c = '\t'; break;
 						case 'n': c = '\n'; break;
-						case 'r': c = '\n'; break;
+						case 'r': c = '\r'; break;
 						case '\\': c = '\\'; break;
 						case '\'': c = '\''; break;
 						case '\"': c = '\"'; break;

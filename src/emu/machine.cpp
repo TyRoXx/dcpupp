@@ -24,7 +24,7 @@ namespace dcpupp
 		registers.fill(0);
 	}
 	
-	Word &Machine::getArgument(unsigned argument)
+	Word &Machine::getArgument(unsigned argument, Word &sp_)
 	{
 		static std::array<Word, 32> SmallLiterals =
 		{{
@@ -49,13 +49,13 @@ namespace dcpupp
 			return memory[memory[pc++] + registers[argument - 0x10]];
 			
 		case 0x18:
-			return memory[sp++];
+			return memory[sp_++];
 			
 		case 0x19:
-			return memory[sp];
+			return memory[sp_];
 			
 		case 0x1a:
-			return memory[--sp];
+			return memory[--sp_];
 			
 		case 0x1b:
 			return sp;

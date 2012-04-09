@@ -10,6 +10,11 @@ namespace dcpupp
 	}
 	
 	
+	ILineHandler::~ILineHandler()
+	{
+	}
+	
+	
 	Compiler::Compiler(
 		Parser &parser,
 		MemoryBuffer &code,
@@ -21,7 +26,7 @@ namespace dcpupp
 	{
 	}
 	
-	bool Compiler::compile()
+	bool Compiler::compile(ILineHandler *lineHandler)
 	{
 		struct Label
 		{
@@ -122,13 +127,20 @@ namespace dcpupp
 		
 		CodeWriter codeWriter(m_code);
 		
-		for (auto line = lines.begin(); line != lines.end(); ++line)
+		for (auto l = lines.begin(); l != lines.end(); ++l)
 		{
-			if (line->statement)
+			const Line &line = *l;
+			
+			if (lineHandler)
+			{
+				lineHandler->handleLine(line);
+			}
+			
+			if (line.statement)
 			{
 				try
 				{
-					auto &statement = *line->statement;
+					auto &statement = *line.statement;
 					statement.compile(codeWriter, labelManager);
 				}
 				catch (const SemanticException &e)

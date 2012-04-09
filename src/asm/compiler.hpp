@@ -25,6 +25,13 @@ namespace dcpupp
 	};
 	
 	
+	struct ILineHandler
+	{
+		virtual ~ILineHandler();
+		virtual void handleLine(const Line &line) = 0;
+	};
+	
+	
 	struct Compiler
 	{
 		explicit Compiler(
@@ -32,7 +39,7 @@ namespace dcpupp
 			MemoryBuffer &code,
 			ICompilerErrorHandler &errorHandler
 			);
-		bool compile();
+		bool compile(ILineHandler *lineHandler = 0);
 		
 	private:
 	

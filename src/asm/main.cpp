@@ -92,7 +92,32 @@ private:
 	}
 };
 
-static void assemble(const std::string &fileName)
+struct LinePrinter : ILineHandler
+{
+	std::ostream &dest;
+	
+	explicit LinePrinter(std::ostream &dest)
+		: dest(dest)
+	{
+	}
+	
+	virtual void handleLine(const Line &line)
+	{
+		if (!line.label.empty())
+		{
+			dest << ":" << line.label << " ";
+		}
+		
+		if (line.statement)
+		{
+			line.statement->print(dest);
+		}
+		
+		dest << " (" << line.getSizeInMemory() << ")\n";
+	}
+};
+
+static void assemble(const std::string &fileName, const std::string *feedbackFileName)
 {
 	std::string source;
 	{
@@ -122,7 +147,22 @@ static void assemble(const std::string &fileName)
 		parser,
 		code,
 		errorHandler);
-	if (!compiler.compile())
+	
+	std::unique_ptr<ILineHandler> lineHandler;
+	std::ofstream feedback;
+	if (feedbackFileName)
+	{
+		feedback.open(feedbackFileName->c_str());
+		if (!feedback)
+		{
+			cerr << "Could not open feedback file " << *feedbackFileName << endl;
+			return;
+		}
+		
+		lineHandler.reset(new LinePrinter(feedback));
+	}
+	
+	if (!compiler.compile(lineHandler.get()))
 	{
 		return;
 	}
@@ -157,7 +197,8 @@ int main(int argc, char **argv)
 	
 	for (auto f = sourceFileNames.begin(); f != sourceFileNames.end(); ++f)
 	{
-		assemble(*f);
+		const auto feedbackFileName = *f + ".fb";
+		assemble(*f, &feedbackFileName);
 	}
 }
 
