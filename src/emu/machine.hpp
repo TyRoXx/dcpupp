@@ -109,10 +109,10 @@ namespace dcpupp
 				
 			case Op_Add:
 				{
+					const auto result = *a_ref + *b_ref;
+					o = (result > MaxWord);
 					if (isAWriteable)
 					{
-						const auto result = *a_ref + *b_ref;
-						o = (result > MaxWord);
 						*a_ref = static_cast<Word>(result);
 					}
 					break;
@@ -120,10 +120,10 @@ namespace dcpupp
 				
 			case Op_Sub:
 				{
+					const auto result = *a_ref - *b_ref;
+					o = (result > MaxWord) ? MaxWord : 0;
 					if (isAWriteable)
 					{
-						const auto result = *a_ref - *b_ref;
-						o = (result > MaxWord) ? MaxWord : 0;
 						*a_ref = static_cast<Word>(result);
 					}
 					break;
@@ -131,10 +131,10 @@ namespace dcpupp
 				
 			case Op_Mul:
 				{
+					const auto result = *a_ref * *b_ref;
+					o = (result >> 16);
 					if (isAWriteable)
 					{
-						const auto result = *a_ref * *b_ref;
-						o = (result >> 16);
 						*a_ref = static_cast<Word>(result);
 					}
 					break;
@@ -142,18 +142,19 @@ namespace dcpupp
 				
 			case Op_Div:
 				{
+					unsigned result;
+					if (*b_ref == 0)
+					{
+						result = o = 0;
+					}
+					else
+					{
+						result = *a_ref / *b_ref;
+						o = ((*a_ref << 16) / *b_ref);
+					}
 					if (isAWriteable)
 					{
-						if (*b_ref == 0)
-						{
-							*a_ref = o = 0;
-						}
-						else
-						{
-							const auto result = *a_ref / *b_ref;
-							o = ((*a_ref << 16) / *b_ref);
-							*a_ref = static_cast<Word>(result);
-						}
+						*a_ref = static_cast<Word>(result);
 					}
 					break;
 				}
@@ -176,10 +177,10 @@ namespace dcpupp
 				
 			case Op_Shl:
 				{
+					const auto result = *a_ref << *b_ref;
+					o = (result >> 16);
 					if (isAWriteable)
 					{
-						const auto result = *a_ref << *b_ref;
-						o = (result >> 16);
 						*a_ref = static_cast<Word>(result);
 					}
 					break;
@@ -187,10 +188,10 @@ namespace dcpupp
 				
 			case Op_Shr:
 				{
+					const auto result = *a_ref >> *b_ref;
+					o = ((*a_ref << 16) >> *b_ref);
 					if (isAWriteable)
 					{
-						const auto result = *a_ref >> *b_ref;
-						o = ((*a_ref << 16) >> *b_ref);
 						*a_ref = static_cast<Word>(result);
 					}
 					break;

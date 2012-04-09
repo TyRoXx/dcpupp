@@ -139,6 +139,11 @@ int main(int argc, char **argv)
 			fputc('\n', stdout);
 		}
 
+		static char sanitizeCharacter(char c)
+		{
+			return (c >= 0 && c <= ' ') ? ' ' : c;
+		}
+		
 		void printInfo()
 		{
 #ifdef WIN32
@@ -181,7 +186,7 @@ int main(int argc, char **argv)
 #ifdef WIN32
 					SetConsoleTextAttribute(console, c >> 8);
 #endif
-					fputc((char)c, stdout);
+					fputc(sanitizeCharacter(static_cast<char>(c)), stdout);
 				}
 				setDefaultTextColors();
 				fputc('|', stdout);
