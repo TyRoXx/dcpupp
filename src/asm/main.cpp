@@ -57,6 +57,17 @@ struct ErrorHandler : ICompilerErrorHandler
 		cerr << endl;
 	}
 	
+	virtual void handleError(const SemanticException &e)
+	{
+		cerr << "Semantic error (" << (getLine(e.position) + 1) << "): ";
+		switch (e.error)
+		{
+		case SemErr_UnknownIdentifier: cerr << "Unknown identifier: " << getRestOfLine(e.position); break;
+		default: cerr << "Unknown error"; break;
+		}
+		cerr << endl;
+	}
+	
 	virtual void handleRedefinition(
 		SourceIterator previous,
 		SourceIterator redefined,

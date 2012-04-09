@@ -34,6 +34,21 @@ namespace dcpupp
 			);
 	};
 	
+	enum SemanticErrorCode
+	{
+		SemErr_UnknownIdentifier,
+	};
+	
+	struct SemanticException : Exception
+	{
+		SemanticErrorCode error;
+		
+		explicit SemanticException(
+			SourceIterator position,
+			SemanticErrorCode error
+			);
+	};
+	
 	enum
 	{
 		UniversalRegisterCount = 8,
@@ -100,8 +115,9 @@ namespace dcpupp
 	struct LabelConstant : Constant
 	{
 		std::string name;
+		SourceIterator position;
 		
-		explicit LabelConstant(std::string name);
+		explicit LabelConstant(std::string name, SourceIterator position);
 		virtual bool isBelow(std::uint16_t value) const;
 		virtual std::uint16_t getValue(const ILabelResolver &resolver) const;
 		virtual void print(std::ostream &os) const;
@@ -311,7 +327,7 @@ namespace dcpupp
 		static std::unique_ptr<IElement> createFixedElement(
 			std::vector<Word> value);
 		static std::unique_ptr<IElement> createSymbolElement(
-			std::string name);
+			std::string name, SourceIterator position);
 	};
 	
 	struct Line

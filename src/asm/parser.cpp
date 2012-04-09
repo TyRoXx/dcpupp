@@ -82,6 +82,16 @@ namespace dcpupp
 	}
 	
 	
+	SemanticException::SemanticException(
+		SourceIterator position,
+		SemanticErrorCode error
+		)
+		: Exception("Semantic error", position)
+		, error(error)
+	{
+	}
+
+	
 	IMemoryWriter::~IMemoryWriter()
 	{
 	}
@@ -123,8 +133,9 @@ namespace dcpupp
 	}
 	
 	
-	LabelConstant::LabelConstant(std::string name)
+	LabelConstant::LabelConstant(std::string name, SourceIterator position)
 		: name(std::move(name))
+		, position(position)
 	{
 	}
 	
@@ -138,7 +149,7 @@ namespace dcpupp
 		std::uint16_t value;
 		if (!resolver.resolve(name, value))
 		{
-			assert(!"TODO");
+			throw SemanticException(position, SemErr_UnknownIdentifier);
 		}
 		return value;
 	}
@@ -599,8 +610,11 @@ namespace dcpupp
 	
 	struct SymbolDataElement : Data::IElement
 	{
-		explicit SymbolDataElement(std::string name)
+		explicit SymbolDataElement(
+			std::string name,
+			SourceIterator position)
 			: m_name(std::move(name))
+			, m_position(position)
 		{
 		}
 		
@@ -612,7 +626,7 @@ namespace dcpupp
 			Word value;
 			if (!resolver.resolve(m_name, value))
 			{
-				assert(!"TODO");
+				throw SemanticException(m_position, SemErr_UnknownIdentifier);
 			}
 			destination.write(value);
 		}
@@ -620,6 +634,7 @@ namespace dcpupp
 	private:
 	
 		std::string m_name;
+		SourceIterator m_position;
 	};
 	
 		
@@ -663,10 +678,10 @@ namespace dcpupp
 	}
 	
 	std::unique_ptr<Data::IElement> Data::createSymbolElement(
-		std::string name)
+		std::string name, SourceIterator position)
 	{
 		return std::unique_ptr<Data::IElement>(new SymbolDataElement(
-			std::move(name)));
+			std::move(name), position));
 	}
 	
 		
@@ -935,7 +950,7 @@ namespace dcpupp
 			else if (current.type == Tk_Identifier)
 			{
 				data.push_back(Data::createSymbolElement(
-					std::string(current.begin, current.end)));
+					std::string(current.begin, current.end), current.begin));
 			}
 			else
 			{
@@ -997,7 +1012,9 @@ namespace dcpupp
 					std::unique_ptr<Constant> constant;
 					if (secondToken.type == Tk_Identifier)
 					{
-						constant.reset(new LabelConstant(std::string(secondToken.begin, secondToken.end)));
+						constant.reset(new LabelConstant(
+							std::string(secondToken.begin, secondToken.end),
+							secondToken.begin));
 					}
 					else
 					{
@@ -1039,7 +1056,9 @@ namespace dcpupp
 			{
 				return std::unique_ptr<Argument>(
 					new WordArgument(std::unique_ptr<Constant>(
-						new LabelConstant(std::string(firstToken.begin, firstToken.end)))));
+						new LabelConstant(
+							std::string(firstToken.begin, firstToken.end),
+							firstToken.begin))));
 			}
 			
 		case Tk_Pop:

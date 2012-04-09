@@ -126,8 +126,16 @@ namespace dcpupp
 		{
 			if (line->statement)
 			{
-				auto &statement = *line->statement;
-				statement.compile(codeWriter, labelManager);
+				try
+				{
+					auto &statement = *line->statement;
+					statement.compile(codeWriter, labelManager);
+				}
+				catch (const SemanticException &e)
+				{
+					m_errorHandler.handleError(e);
+					success = false;
+				}
 			}
 		}
 		

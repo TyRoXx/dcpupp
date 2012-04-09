@@ -16,6 +16,7 @@ namespace dcpupp
 		virtual ~ICompilerErrorHandler();
 		virtual void handleError(const LexicalException &e) = 0;
 		virtual void handleError(const SyntaxException &e) = 0;
+		virtual void handleError(const SemanticException &e) = 0;
 		virtual void handleRedefinition(
 			SourceIterator previous,
 			SourceIterator redefined,
