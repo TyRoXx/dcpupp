@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 			
 			default:
 				cerr << "Invalid option '" << arg << "'";
-				break;
+				return 1;
 			}
 		}
 		else
