@@ -73,23 +73,23 @@ namespace dcpupp
 	struct IMemoryWriter
 	{
 		virtual ~IMemoryWriter();
-		virtual void write(std::uint16_t value) = 0;
+		virtual void write(Word value) = 0;
 	};
 	
 	struct ILabelResolver
 	{
 		virtual ~ILabelResolver();
-		virtual bool resolve(const std::string &name, std::uint16_t &value) const = 0;
+		virtual bool resolve(const std::string &name, Word &value) const = 0;
 	};
 	
 	struct Argument
 	{
 		virtual ~Argument();
 		virtual void print(std::ostream &os) const = 0;
-		virtual std::uint16_t getExtraWordCount() const = 0;
+		virtual Word getExtraWordCount() const = 0;
 		virtual bool hasExtraWord(
 			unsigned &typeCode,
-			std::uint16_t &extra,
+			Word &extra,
 			ILabelResolver &resolver
 			) const = 0;
 	};
@@ -97,18 +97,18 @@ namespace dcpupp
 	struct Constant
 	{
 		virtual ~Constant();
-		virtual bool isBelow(std::uint16_t value) const = 0;
-		virtual std::uint16_t getValue(const ILabelResolver &resolver) const = 0;
+		virtual bool isBelow(Word value) const = 0;
+		virtual Word getValue(const ILabelResolver &resolver) const = 0;
 		virtual void print(std::ostream &os) const = 0;
 	};
 	
 	struct NumericConstant : Constant
 	{
-		std::uint16_t value;
+		Word value;
 		
-		explicit NumericConstant(std::uint16_t value);
-		virtual bool isBelow(std::uint16_t value) const;
-		virtual std::uint16_t getValue(const ILabelResolver &resolver) const;
+		explicit NumericConstant(Word value);
+		virtual bool isBelow(Word value) const;
+		virtual Word getValue(const ILabelResolver &resolver) const;
 		virtual void print(std::ostream &os) const;
 	};
 	
@@ -118,8 +118,8 @@ namespace dcpupp
 		SourceIterator position;
 		
 		explicit LabelConstant(std::string name, SourceIterator position);
-		virtual bool isBelow(std::uint16_t value) const;
-		virtual std::uint16_t getValue(const ILabelResolver &resolver) const;
+		virtual bool isBelow(Word value) const;
+		virtual Word getValue(const ILabelResolver &resolver) const;
 		virtual void print(std::ostream &os) const;
 	};
 	
@@ -129,10 +129,10 @@ namespace dcpupp
 		
 		explicit RegisterArgument(unsigned id);
 		virtual void print(std::ostream &os) const;
-		virtual std::uint16_t getExtraWordCount() const;
+		virtual Word getExtraWordCount() const;
 		virtual bool hasExtraWord(
 			unsigned &typeCode,
-			std::uint16_t &extra,
+			Word &extra,
 			ILabelResolver &resolver
 			) const;
 	};
@@ -143,10 +143,10 @@ namespace dcpupp
 		
 		explicit RegisterPtrArgument(unsigned id);
 		virtual void print(std::ostream &os) const;
-		virtual std::uint16_t getExtraWordCount() const;
+		virtual Word getExtraWordCount() const;
 		virtual bool hasExtraWord(
 			unsigned &typeCode,
-			std::uint16_t &extra,
+			Word &extra,
 			ILabelResolver &resolver
 			) const;
 	};
@@ -161,10 +161,10 @@ namespace dcpupp
 			std::unique_ptr<Constant> extra
 			);
 		virtual void print(std::ostream &os) const;
-		virtual std::uint16_t getExtraWordCount() const;
+		virtual Word getExtraWordCount() const;
 		virtual bool hasExtraWord(
 			unsigned &typeCode,
-			std::uint16_t &extra,
+			Word &extra,
 			ILabelResolver &resolver
 			) const;
 	};
@@ -172,10 +172,10 @@ namespace dcpupp
 	struct PopArgument : Argument
 	{
 		virtual void print(std::ostream &os) const;
-		virtual std::uint16_t getExtraWordCount() const;
+		virtual Word getExtraWordCount() const;
 		virtual bool hasExtraWord(
 			unsigned &typeCode,
-			std::uint16_t &extra,
+			Word &extra,
 			ILabelResolver &resolver
 			) const;
 	};
@@ -183,10 +183,10 @@ namespace dcpupp
 	struct PeekArgument : Argument
 	{
 		virtual void print(std::ostream &os) const;
-		virtual std::uint16_t getExtraWordCount() const;
+		virtual Word getExtraWordCount() const;
 		virtual bool hasExtraWord(
 			unsigned &typeCode,
-			std::uint16_t &extra,
+			Word &extra,
 			ILabelResolver &resolver
 			) const;
 	};
@@ -194,10 +194,10 @@ namespace dcpupp
 	struct PushArgument : Argument
 	{
 		virtual void print(std::ostream &os) const;
-		virtual std::uint16_t getExtraWordCount() const;
+		virtual Word getExtraWordCount() const;
 		virtual bool hasExtraWord(
 			unsigned &typeCode,
-			std::uint16_t &extra,
+			Word &extra,
 			ILabelResolver &resolver
 			) const;
 	};
@@ -205,10 +205,10 @@ namespace dcpupp
 	struct SPArgument : Argument
 	{
 		virtual void print(std::ostream &os) const;
-		virtual std::uint16_t getExtraWordCount() const;
+		virtual Word getExtraWordCount() const;
 		virtual bool hasExtraWord(
 			unsigned &typeCode,
-			std::uint16_t &extra,
+			Word &extra,
 			ILabelResolver &resolver
 			) const;
 	};
@@ -216,10 +216,10 @@ namespace dcpupp
 	struct PCArgument : Argument
 	{
 		virtual void print(std::ostream &os) const;
-		virtual std::uint16_t getExtraWordCount() const;
+		virtual Word getExtraWordCount() const;
 		virtual bool hasExtraWord(
 			unsigned &typeCode,
-			std::uint16_t &extra,
+			Word &extra,
 			ILabelResolver &resolver
 			) const;
 	};
@@ -227,10 +227,10 @@ namespace dcpupp
 	struct OArgument : Argument
 	{
 		virtual void print(std::ostream &os) const;
-		virtual std::uint16_t getExtraWordCount() const;
+		virtual Word getExtraWordCount() const;
 		virtual bool hasExtraWord(
 			unsigned &typeCode,
-			std::uint16_t &extra,
+			Word &extra,
 			ILabelResolver &resolver
 			) const;
 	};
@@ -241,10 +241,10 @@ namespace dcpupp
 		
 		explicit WordPtrArgument(std::unique_ptr<Constant> extra);
 		virtual void print(std::ostream &os) const;
-		virtual std::uint16_t getExtraWordCount() const;
+		virtual Word getExtraWordCount() const;
 		virtual bool hasExtraWord(
 			unsigned &typeCode,
-			std::uint16_t &extra,
+			Word &extra,
 			ILabelResolver &resolver
 			) const;
 	};
@@ -255,10 +255,10 @@ namespace dcpupp
 		
 		explicit WordArgument(std::unique_ptr<Constant> extra);
 		virtual void print(std::ostream &os) const;
-		virtual std::uint16_t getExtraWordCount() const;
+		virtual Word getExtraWordCount() const;
 		virtual bool hasExtraWord(
 			unsigned &typeCode,
-			std::uint16_t &extra,
+			Word &extra,
 			ILabelResolver &resolver
 			) const;
 	};
@@ -267,7 +267,7 @@ namespace dcpupp
 	{
 		virtual ~Statement();
 		virtual void print(std::ostream &os) const = 0;
-		virtual std::uint16_t getSizeInMemory() const = 0;
+		virtual Word getSizeInMemory() const = 0;
 		virtual void compile(
 			IMemoryWriter &destination,
 			ILabelResolver &resolver) const = 0;
@@ -283,7 +283,7 @@ namespace dcpupp
 			std::unique_ptr<Argument> argument
 			);
 		virtual void print(std::ostream &os) const;
-		virtual std::uint16_t getSizeInMemory() const;
+		virtual Word getSizeInMemory() const;
 		virtual void compile(
 			IMemoryWriter &destination,
 			ILabelResolver &resolver
@@ -301,7 +301,7 @@ namespace dcpupp
 			std::unique_ptr<Argument> b
 			);
 		virtual void print(std::ostream &os) const;
-		virtual std::uint16_t getSizeInMemory() const;
+		virtual Word getSizeInMemory() const;
 		virtual void compile(
 			IMemoryWriter &destination,
 			ILabelResolver &resolver
@@ -318,7 +318,7 @@ namespace dcpupp
 		explicit Data(ValueElements value);
 		~Data();
 		virtual void print(std::ostream &os) const;
-		virtual std::uint16_t getSizeInMemory() const;
+		virtual Word getSizeInMemory() const;
 		virtual void compile(
 			IMemoryWriter &destination,
 			ILabelResolver &resolver
@@ -344,7 +344,7 @@ namespace dcpupp
 		Line(Line &&other);
 		Line &operator = (Line &&other);
 		void swap(Line &other);
-		std::uint16_t getSizeInMemory() const;
+		Word getSizeInMemory() const;
 	};
 	
 	struct Parser

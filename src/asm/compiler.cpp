@@ -30,7 +30,7 @@ namespace dcpupp
 	{
 		struct Label
 		{
-			std::uint16_t address;
+			Word address;
 			std::size_t line;
 		};
 		
@@ -38,7 +38,7 @@ namespace dcpupp
 		{
 			std::map<std::string, Label> labels;
 			
-			virtual bool resolve(const std::string &name, std::uint16_t &value) const
+			virtual bool resolve(const std::string &name, Word &value) const
 			{
 				auto pos = labels.find(name);
 				if (pos == labels.end())
@@ -54,7 +54,7 @@ namespace dcpupp
 		
 		bool success = true;
 		std::vector<Line> lines;
-		std::uint16_t positionInMemory = 0;
+		Word positionInMemory = 0;
 		
 		for (;;)
 		{
@@ -119,7 +119,7 @@ namespace dcpupp
 			{
 			}
 			
-			virtual void write(std::uint16_t value)
+			virtual void write(Word value)
 			{
 				buffer.push_back(value);
 			}

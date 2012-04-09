@@ -47,7 +47,7 @@ namespace dcpupp
 		}
 	}
 	
-	static std::uint16_t getIntegerValue(const Token &token)
+	static Word getIntegerValue(const Token &token)
 	{
 		unsigned base;
 		switch (token.type)
@@ -68,7 +68,7 @@ namespace dcpupp
 			value += getDigitValue(*i);
 		}
 		
-		return static_cast<std::uint16_t>(value);
+		return static_cast<Word>(value);
 	}
 	
 	
@@ -112,17 +112,17 @@ namespace dcpupp
 	}
 	
 	
-	NumericConstant::NumericConstant(std::uint16_t value)
+	NumericConstant::NumericConstant(Word value)
 		: value(value)
 	{
 	}
 	
-	bool NumericConstant::isBelow(std::uint16_t value) const
+	bool NumericConstant::isBelow(Word value) const
 	{
 		return (this->value < value);
 	}
 	
-	std::uint16_t NumericConstant::getValue(const ILabelResolver &resolver) const
+	Word NumericConstant::getValue(const ILabelResolver &resolver) const
 	{
 		return value;
 	}
@@ -139,14 +139,14 @@ namespace dcpupp
 	{
 	}
 	
-	bool LabelConstant::isBelow(std::uint16_t value) const
+	bool LabelConstant::isBelow(Word value) const
 	{
 		return false; //unknown at this time
 	}
 	
-	std::uint16_t LabelConstant::getValue(const ILabelResolver &resolver) const
+	Word LabelConstant::getValue(const ILabelResolver &resolver) const
 	{
-		std::uint16_t value;
+		Word value;
 		if (!resolver.resolve(name, value))
 		{
 			throw SemanticException(position, SemErr_UnknownIdentifier);
@@ -172,14 +172,14 @@ namespace dcpupp
 		os << UniversalRegisterNames[id];
 	}
 	
-	std::uint16_t RegisterArgument::getExtraWordCount() const
+	Word RegisterArgument::getExtraWordCount() const
 	{
 		return 0;
 	}
 	
 	bool RegisterArgument::hasExtraWord(
 		unsigned &typeCode,
-		std::uint16_t &extra,
+		Word &extra,
 		ILabelResolver &resolver
 		) const
 	{
@@ -198,14 +198,14 @@ namespace dcpupp
 		os << "[" << UniversalRegisterNames[id] << "]";
 	}
 	
-	std::uint16_t RegisterPtrArgument::getExtraWordCount() const
+	Word RegisterPtrArgument::getExtraWordCount() const
 	{
 		return 0;
 	}
 	
 	bool RegisterPtrArgument::hasExtraWord(
 		unsigned &typeCode,
-		std::uint16_t &extra,
+		Word &extra,
 		ILabelResolver &resolver
 		) const
 	{
@@ -230,14 +230,14 @@ namespace dcpupp
 		os << "+" << UniversalRegisterNames[id] << "]";
 	}
 	
-	std::uint16_t RegisterWordPtrArgument::getExtraWordCount() const
+	Word RegisterWordPtrArgument::getExtraWordCount() const
 	{
 		return 1;
 	}
 	
 	bool RegisterWordPtrArgument::hasExtraWord(
 		unsigned &typeCode,
-		std::uint16_t &extra,
+		Word &extra,
 		ILabelResolver &resolver
 		) const
 	{
@@ -252,14 +252,14 @@ namespace dcpupp
 		os << "POP";
 	}
 	
-	std::uint16_t PopArgument::getExtraWordCount() const
+	Word PopArgument::getExtraWordCount() const
 	{
 		return 0;
 	}
 	
 	bool PopArgument::hasExtraWord(
 		unsigned &typeCode,
-		std::uint16_t &extra,
+		Word &extra,
 		ILabelResolver &resolver
 		) const
 	{
@@ -273,14 +273,14 @@ namespace dcpupp
 		os << "PEEK";
 	}
 	
-	std::uint16_t PeekArgument::getExtraWordCount() const
+	Word PeekArgument::getExtraWordCount() const
 	{
 		return 0;
 	}
 	
 	bool PeekArgument::hasExtraWord(
 		unsigned &typeCode,
-		std::uint16_t &extra,
+		Word &extra,
 		ILabelResolver &resolver
 		) const
 	{
@@ -294,14 +294,14 @@ namespace dcpupp
 		os << "PUSH";
 	}
 	
-	std::uint16_t PushArgument::getExtraWordCount() const
+	Word PushArgument::getExtraWordCount() const
 	{
 		return 0;
 	}
 	
 	bool PushArgument::hasExtraWord(
 		unsigned &typeCode,
-		std::uint16_t &extra,
+		Word &extra,
 		ILabelResolver &resolver
 		) const
 	{
@@ -315,14 +315,14 @@ namespace dcpupp
 		os << "SP";
 	}
 	
-	std::uint16_t SPArgument::getExtraWordCount() const
+	Word SPArgument::getExtraWordCount() const
 	{
 		return 0;
 	}
 	
 	bool SPArgument::hasExtraWord(
 		unsigned &typeCode,
-		std::uint16_t &extra,
+		Word &extra,
 		ILabelResolver &resolver
 		) const
 	{
@@ -336,14 +336,14 @@ namespace dcpupp
 		os << "PC";
 	}
 	
-	std::uint16_t PCArgument::getExtraWordCount() const
+	Word PCArgument::getExtraWordCount() const
 	{
 		return 0;
 	}
 	
 	bool PCArgument::hasExtraWord(
 		unsigned &typeCode,
-		std::uint16_t &extra,
+		Word &extra,
 		ILabelResolver &resolver
 		) const
 	{
@@ -357,14 +357,14 @@ namespace dcpupp
 		os << "O";
 	}
 	
-	std::uint16_t OArgument::getExtraWordCount() const
+	Word OArgument::getExtraWordCount() const
 	{
 		return 0;
 	}
 	
 	bool OArgument::hasExtraWord(
 		unsigned &typeCode,
-		std::uint16_t &extra,
+		Word &extra,
 		ILabelResolver &resolver
 		) const
 	{
@@ -385,14 +385,14 @@ namespace dcpupp
 		os << "]";
 	}
 	
-	std::uint16_t WordPtrArgument::getExtraWordCount() const
+	Word WordPtrArgument::getExtraWordCount() const
 	{
 		return 1;
 	}
 	
 	bool WordPtrArgument::hasExtraWord(
 		unsigned &typeCode,
-		std::uint16_t &extra,
+		Word &extra,
 		ILabelResolver &resolver
 		) const
 	{
@@ -412,14 +412,14 @@ namespace dcpupp
 		extra->print(os);
 	}
 	
-	std::uint16_t WordArgument::getExtraWordCount() const
+	Word WordArgument::getExtraWordCount() const
 	{
 		return extra->isBelow(32) ? 0 : 1;
 	}
 	
 	bool WordArgument::hasExtraWord(
 		unsigned &typeCode,
-		std::uint16_t &extra,
+		Word &extra,
 		ILabelResolver &resolver
 		) const
 	{
@@ -471,7 +471,7 @@ namespace dcpupp
 		argument->print(os);
 	}
 	
-	std::uint16_t UnaryStatement::getSizeInMemory() const
+	Word UnaryStatement::getSizeInMemory() const
 	{
 		return (1 + argument->getExtraWordCount());
 	}
@@ -482,7 +482,7 @@ namespace dcpupp
 	{
 		const unsigned opcode = 0;
 		unsigned a_code = (operation - NBOp_Jsr + 1), b_code;
-		std::uint16_t b_extra;
+		Word b_extra;
 		const bool hasBExtra = argument->hasExtraWord(b_code, b_extra, resolver);
 		
 		destination.write(
@@ -541,7 +541,7 @@ namespace dcpupp
 		b->print(os);
 	}
 	
-	std::uint16_t BinaryStatement::getSizeInMemory() const
+	Word BinaryStatement::getSizeInMemory() const
 	{
 		return (1 + a->getExtraWordCount() + b->getExtraWordCount());
 	}
@@ -552,7 +552,7 @@ namespace dcpupp
 	{
 		const unsigned opcode = (operation - Op_Set + 1);
 		unsigned a_code, b_code;
-		std::uint16_t a_extra, b_extra;
+		Word a_extra, b_extra;
 		const bool hasAExtra = a->hasExtraWord(a_code, a_extra, resolver);
 		const bool hasBExtra = b->hasExtraWord(b_code, b_extra, resolver);
 		
@@ -664,7 +664,7 @@ namespace dcpupp
 		os << "(data)";
 	}
 	
-	std::uint16_t Data::getSizeInMemory() const
+	Word Data::getSizeInMemory() const
 	{
 		Word size = 0;
 		for (auto i = value.begin(); i != value.end(); ++i)
@@ -738,7 +738,7 @@ namespace dcpupp
 		std::swap(begin, other.begin);
 	}
 	
-	std::uint16_t Line::getSizeInMemory() const
+	Word Line::getSizeInMemory() const
 	{
 		return statement ? statement->getSizeInMemory() : 0;
 	}

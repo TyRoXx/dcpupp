@@ -8,7 +8,7 @@
 
 namespace dcpupp
 {
-	typedef std::vector<std::uint16_t> MemoryBuffer;
+	typedef std::vector<Word> MemoryBuffer;
 	
 	
 	struct ICompilerErrorHandler
