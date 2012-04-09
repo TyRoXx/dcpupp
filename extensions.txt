@@ -1,0 +1,20 @@
+Additionally to the official specifications, DCPU++ supports various extensions
+to the DCPU-16 assembler:
+
+Integer literals for bases 2 and 8
+    Binary: 0b101 == 0B101 == 5
+    Octal: 031 == 25
+
+Hexadecimal literals may start with 0X.
+
+DAT command lets the assembler store arbitrary data.
+    DAT 0x1234
+    DAT "Hello, World!\n\r\t\\\"\'", 0
+    DAT "abc", even_labels_are_supported, 123
+
+RESERVE consumes a given amount of memory.
+    :buffer RESERVE 64  ; 64 words of memory
+
+Commutative addition of a register and the next word
+    SET [2+A], 0
+    SET [A+2], 0
