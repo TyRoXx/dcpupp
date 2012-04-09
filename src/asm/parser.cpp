@@ -1060,9 +1060,43 @@ namespace dcpupp
 				auto secondToken = popToken();
 				if (isUniversalRegister(secondToken.type))
 				{
-					expectRightBracket();
-					return std::unique_ptr<Argument>(
-						new RegisterPtrArgument(secondToken.type - Tk_A));
+					const auto &registerToken = secondToken;
+					const Token plusToken = peekToken();
+					if (plusToken.type == Tk_Plus)
+					{
+						popToken();
+
+						const Token numberToken = popToken();
+
+						std::unique_ptr<Constant> constant;
+						if (numberToken.type == Tk_Identifier)
+						{
+							constant.reset(new LabelConstant(
+								std::string(secondToken.begin, secondToken.end),
+								secondToken.begin));
+						}
+						else if (isIntegerLiteral(numberToken.type))
+						{
+							constant.reset(new NumericConstant(
+								getIntegerValue(numberToken)));
+						}
+						else
+						{
+							throw SyntaxException(firstToken.begin, SynErr_ArgumentExpected);
+						}
+
+						expectRightBracket();
+						return std::unique_ptr<Argument>(
+							new RegisterWordPtrArgument(
+							registerToken.type - Tk_A,
+							std::move(constant)));
+					}
+					else
+					{
+						expectRightBracket();
+						return std::unique_ptr<Argument>(
+							new RegisterPtrArgument(secondToken.type - Tk_A));
+					}
 				}
 				else if (secondToken.type == Tk_Identifier ||
 					isIntegerLiteral(secondToken.type))
@@ -1076,7 +1110,8 @@ namespace dcpupp
 					}
 					else
 					{
-						constant.reset(new NumericConstant(getIntegerValue(secondToken)));
+						constant.reset(new NumericConstant(
+							getIntegerValue(secondToken)));
 					}
 						
 					const Token plusToken = peekToken();
