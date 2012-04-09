@@ -11,7 +11,6 @@
 
 namespace dcpupp
 {
-	
 	enum
 	{
 		UniversalRegisterCount = 8,
@@ -68,7 +67,7 @@ namespace dcpupp
 			const auto op = (instr & 0x0f);
 			Word *a_ref, *b_ref;
 			Word savedSp = sp;
-				
+			
 			if (op != Op_NonBasic)
 			{
 				a_ref = &getArgument(a, savedSp);
@@ -81,7 +80,7 @@ namespace dcpupp
 				skipNext = false;
 				goto next_instruction;
 			}
-		
+			
 			sp = savedSp;
 			
 			switch (op)
