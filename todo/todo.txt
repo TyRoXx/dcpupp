@@ -1,5 +1,4 @@
 Assembler
-- 'reserve' keyword
 - [A+123] syntax as an alternative to [123+A]
 - [A-1] syntax as a shortcut for [A+65535]
 

@@ -123,6 +123,11 @@ namespace dcpupp
 			{
 				buffer.push_back(value);
 			}
+
+			virtual void reserve(Word size)
+			{
+				buffer.resize(buffer.size() + size);
+			}
 		};
 		
 		CodeWriter codeWriter(m_code);

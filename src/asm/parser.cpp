@@ -700,6 +700,30 @@ namespace dcpupp
 		return std::unique_ptr<Data::IElement>(new SymbolDataElement(
 			std::move(name), position));
 	}
+
+
+	ReserveStatement::ReserveStatement(Word size)
+		: m_size(size)
+	{
+	}
+
+	void ReserveStatement::print(std::ostream &os) const
+	{
+		os << "RESERVE " << m_size;
+	}
+
+	Word ReserveStatement::getSizeInMemory() const
+	{
+		return m_size;
+	}
+
+	void ReserveStatement::compile(
+		IMemoryWriter &destination,
+		ILabelResolver &resolver
+		) const
+	{
+		destination.reserve(m_size);
+	}
 	
 		
 	Line::Line(
@@ -852,6 +876,10 @@ namespace dcpupp
 				{
 					statement = parseData();
 				}
+				else if (identifier == "RESERVE")
+				{
+					statement = parseReserve();
+				}
 				else
 				{
 					throw SyntaxException(keyword.begin, SynErr_KeywordExpected);
@@ -988,6 +1016,19 @@ namespace dcpupp
 		
 		return std::unique_ptr<Statement>(
 			new Data(std::move(data)));
+	}
+
+	std::unique_ptr<Statement> Parser::parseReserve()
+	{
+		const auto sizeToken = popToken();
+		if (!isIntegerLiteral(sizeToken.type))
+		{
+			throw SyntaxException(sizeToken.begin, SynErr_ReservedSizeExpected);
+		}
+
+		const auto size = getIntegerValue(sizeToken);
+		return std::unique_ptr<Statement>(
+			new ReserveStatement(size));
 	}
 	
 	static bool isUniversalRegister(TokenId token)

@@ -22,6 +22,7 @@ namespace dcpupp
 		SynErr_ArgumentExpected,
 		SynErr_DataExpected,
 		SynErr_UniversalRegisterExpected,
+		SynErr_ReservedSizeExpected,
 	};
 	
 	struct SyntaxException : Exception
@@ -74,6 +75,7 @@ namespace dcpupp
 	{
 		virtual ~IMemoryWriter();
 		virtual void write(Word value) = 0;
+		virtual void reserve(Word size) = 0;
 	};
 	
 	struct ILabelResolver
@@ -329,6 +331,21 @@ namespace dcpupp
 		static std::unique_ptr<IElement> createSymbolElement(
 			std::string name, SourceIterator position);
 	};
+
+	struct ReserveStatement : Statement
+	{
+		explicit ReserveStatement(Word size);
+		virtual void print(std::ostream &os) const;
+		virtual Word getSizeInMemory() const;
+		virtual void compile(
+			IMemoryWriter &destination,
+			ILabelResolver &resolver
+			) const;
+
+	private:
+
+		Word m_size;
+	};
 	
 	struct Line
 	{
@@ -367,6 +384,7 @@ namespace dcpupp
 		std::unique_ptr<Statement> parseBinaryStatement(OperationId operation);
 		std::unique_ptr<Statement> parseUnaryStatement(NonBasicOperationId operation);
 		std::unique_ptr<Statement> parseData();
+		std::unique_ptr<Statement> parseReserve();
 		std::unique_ptr<Argument> parseArgument();
 		void expectRightBracket();
 	};
