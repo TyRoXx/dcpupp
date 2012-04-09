@@ -92,25 +92,15 @@ private:
 	}
 };
 
-int main(int argc, char **argv)
+static void assemble(const std::string &fileName)
 {
-	const vector<string> args(argv + 1, argv + argc);
-	
-	if (args.empty())
-	{
-		printHelp();
-		return 0;
-	}
-	
-	const auto sourceFileName = args[0];
-	
 	std::string source;
 	{
-		std::ifstream file(sourceFileName.c_str(), std::ios::binary);
+		std::ifstream file(fileName.c_str(), std::ios::binary);
 		if (!file)
 		{
-			cerr << "Could not open source file" << endl;
-			return 1;
+			cerr << "Could not open source file " << fileName << endl;
+			return;
 		}
 	
 		source.assign(
@@ -118,6 +108,7 @@ int main(int argc, char **argv)
 			std::istreambuf_iterator<char>());
 	}
 	
+	cerr << "Assembling file " << fileName << endl;
 	Scanner scanner(
 		source.begin(),
 		source.end());
@@ -133,14 +124,15 @@ int main(int argc, char **argv)
 		errorHandler);
 	if (!compiler.compile())
 	{
-		return 1;
+		return;
 	}
 	
-	std::ofstream output((sourceFileName + ".bin").c_str(), std::ios::binary);
+	const auto outFileName = (fileName + ".bin");
+	std::ofstream output(outFileName.c_str(), std::ios::binary);
 	if (!output)
 	{
-		cerr << "Could not open output file" << endl;
-		return 1;
+		cerr << "Could not open output file " << outFileName << endl;
+		return;
 	}
 	
 	if (!code.empty())
@@ -148,6 +140,24 @@ int main(int argc, char **argv)
 		output.write(
 			reinterpret_cast<const char *>(&code[0]),
 			sizeof(code[0]) * code.size());
+	}
+}
+
+int main(int argc, char **argv)
+{
+	const vector<string> args(argv + 1, argv + argc);
+	
+	if (args.empty())
+	{
+		printHelp();
+		return 0;
+	}
+	
+	const auto sourceFileNames = args;
+	
+	for (auto f = sourceFileNames.begin(); f != sourceFileNames.end(); ++f)
+	{
+		assemble(*f);
 	}
 }
 

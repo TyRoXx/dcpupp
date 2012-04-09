@@ -152,9 +152,9 @@ namespace dcpupp
 						//the parser will decode escape sequences
 						switch (*m_pos)
 						{
-						case '\t':
-						case '\n':
-						case '\r':
+						case 't':
+						case 'n':
+						case 'r':
 						case '\\':
 						case '\'':
 						case '\"':

@@ -141,7 +141,7 @@ int main(int argc, char **argv)
 
 		static char sanitizeCharacter(char c)
 		{
-			return (c >= 0 && c <= ' ') ? ' ' : c;
+			return (c >= 0 && c < ' ') ? ' ' : c;
 		}
 		
 		void printInfo()
