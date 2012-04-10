@@ -972,6 +972,7 @@ namespace dcpupp
 						case 't': c = '\t'; break;
 						case 'n': c = '\n'; break;
 						case 'r': c = '\r'; break;
+						case '0': c = '\0'; break;
 						case '\\': c = '\\'; break;
 						case '\'': c = '\''; break;
 						case '\"': c = '\"'; break;

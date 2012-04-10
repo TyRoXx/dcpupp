@@ -155,6 +155,7 @@ namespace dcpupp
 						case 't':
 						case 'n':
 						case 'r':
+						case '0':
 						case '\\':
 						case '\'':
 						case '\"':
