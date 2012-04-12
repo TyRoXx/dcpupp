@@ -1,0 +1,17 @@
+:autoinit       ;;Init data stack register C
+    SET I, SP
+    SUB I, 256
+
+:autostart
+    JSR main
+:autohalt SET PC, autohalt
+    ; .file "/home/jookia/Programming/YADOS/main.c"
+    .text
+    .globl  main
+    ; .align    2
+:main
+    SUB I, 2 ; The Notch order
+    SET [I], 0 ; The Notch order
+    SET A, 1337 ; The Notch order
+    ADD I, 2 ; The Notch order
+    SET PC, POP ; The Notch order
