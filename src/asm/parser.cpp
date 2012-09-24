@@ -43,7 +43,7 @@ namespace dcpupp
 		case 'd': case 'D': return 13;
 		case 'e': case 'E': return 14;
 		case 'f': case 'F': return 15;
-		default: assert(false); return 0;
+		default: assert(!"This is not a supported digit character"); return 0;
 		}
 	}
 	

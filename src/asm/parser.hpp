@@ -57,7 +57,7 @@ namespace dcpupp
 	
 	enum ArgumentType
 	{
-		Arg_Register,
+		Arg_Register = 0x00,
 		Arg_PtrRegister = 0x08,
 		Arg_PtrRegisterWord = 0x10,
 		Arg_Pop = 0x18,

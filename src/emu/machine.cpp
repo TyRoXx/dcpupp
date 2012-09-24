@@ -88,7 +88,7 @@ namespace dcpupp
 		file.read(
 			reinterpret_cast<char *>(program.data()),
 			sizeof(program[0]) * program.size());
-		return std::move(program);
+		return program;
 	}
 }
 
